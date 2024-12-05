@@ -1,6 +1,6 @@
 # Unity-Package-Base
 
-Unity Package 작성을 위한 Base Repository입니다.
+Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
 
 ## 요구사항
 
