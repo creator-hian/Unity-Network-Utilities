@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
+
+using Ping = System.Net.NetworkInformation.Ping;
 
 namespace Hian.NetworkUtilities
 {
@@ -28,6 +31,10 @@ namespace Hian.NetworkUtilities
         
         // Public IP API
         private const string PUBLIC_IP_API = "https://api.ipify.org";
+        
+        private static event Action<bool> _onNetworkStatusChanged;
+        private static bool _lastNetworkStatus;
+        private static int _networkTimeout = DEFAULT_TIMEOUT;
         #endregion
 
         #region Network Status Check
@@ -62,11 +69,9 @@ namespace Hian.NetworkUtilities
         {
             try
             {
-                using (var ping = new Ping())
-                {
-                    PingReply reply = ping.Send(GOOGLE_DNS, DEFAULT_TIMEOUT);
-                    return reply.Status == IPStatus.Success;
-                }
+                using Ping ping = new Ping();
+                PingReply reply = ping.Send(GOOGLE_DNS, _networkTimeout);
+                return reply.Status == IPStatus.Success;
             }
             catch (Exception ex)
             {
@@ -79,11 +84,9 @@ namespace Hian.NetworkUtilities
         {
             try
             {
-                using (var ping = new Ping())
-                {
-                    var reply = await ping.SendPingAsync(GOOGLE_DNS, DEFAULT_TIMEOUT);
-                    return reply.Status == IPStatus.Success;
-                }
+                using Ping ping = new Ping();
+                var reply = await ping.SendPingAsync(GOOGLE_DNS, _networkTimeout);
+                return reply.Status == IPStatus.Success;
             }
             catch (Exception ex)
             {
@@ -96,7 +99,7 @@ namespace Hian.NetworkUtilities
         {
             try
             {
-                using (var client = new WebClient())
+                using (WebClient client = new WebClient())
                 {
                     string result = client.DownloadString(MSFT_TEST_URL);
                     if (result != MSFT_TEST_RESULT)
@@ -129,7 +132,7 @@ namespace Hian.NetworkUtilities
                 }
 
                 // NCSI DNS 확인
-                var dnsHost = await Dns.GetHostEntryAsync(MSFT_DNS)
+                IPHostEntry dnsHost = await Dns.GetHostEntryAsync(MSFT_DNS)
                     .ConfigureAwait(false);
                 return dnsHost.AddressList.Length > 0 && 
                        dnsHost.AddressList[0].ToString() == MSFT_DNS_IP;
@@ -152,6 +155,78 @@ namespace Hian.NetworkUtilities
         public static bool IsNetworkAvailable()
         {
             return NetworkInterface.GetIsNetworkAvailable();
+        }
+        
+        /// <summary>
+        /// 네트워크 상태 변경 이벤트
+        /// </summary>
+        /// <remarks>
+        /// 네트워크 상태가 변경될 때 호출되며, 매개변수는 현재 네트워크 사용 가능 여부입니다.
+        /// </remarks>
+        public static event Action<bool> OnNetworkStatusChanged
+        {
+            add
+            {
+                _onNetworkStatusChanged += value;
+                // 구독 시 현재 상태 즉시 전달
+                value?.Invoke(IsNetworkAvailable());
+            }
+            remove
+            {
+                _onNetworkStatusChanged -= value;
+            }
+        }
+
+        /// <summary>
+        /// 로컬 IP 주소를 가져옵니다
+        /// </summary>
+        /// <returns>시스템의 주 네트워크 어댑터의 IPv4 주소</returns>
+        /// <remarks>
+        /// 활성화된 네트워크 어댑터 중 첫 번째 IPv4 주소를 반환합니다.
+        /// 실패 시 빈 문자열을 반환합니다.
+        /// </remarks>
+        public static string GetLocalIPAddress()
+        {
+            try
+            {
+                return GetActiveNetworkInterfaces()
+                    .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+                    .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(ip => ip.Address.ToString())
+                    .FirstOrDefault() ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[NetworkUtility] Failed to get local IP address: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 네트워크 상태 변경을 시뮬레이션합니다 (테스트 용도)
+        /// </summary>
+        /// <param name="isAvailable">시뮬레이션할 네트워크 상태</param>
+        /// <remarks>
+        /// 이 메서드는 테스트 목적으로만 사용됩며, 같은 어셈블리 내에서만 접근 가능합니다.
+        /// </remarks>
+        internal static void SimulateNetworkStatusChange(bool isAvailable)
+        {
+            if (_lastNetworkStatus != isAvailable)
+            {
+                _lastNetworkStatus = isAvailable;
+                _onNetworkStatusChanged?.Invoke(isAvailable);
+            }
+        }
+        
+        /// <summary>
+        /// 네트워크 작업의 타임아웃 값을 설정합니다.
+        /// </summary>
+        /// <param name="milliseconds">타임아웃 시간 (밀리초)</param>
+        public static void SetNetworkTimeout(int milliseconds)
+        {
+            if (milliseconds <= 0)
+                throw new ArgumentException("Timeout must be greater than 0", nameof(milliseconds));
+            _networkTimeout = milliseconds;
         }
         
         #endregion
@@ -258,7 +333,7 @@ namespace Hian.NetworkUtilities
 
             try
             {
-                var networkInterface = GetActiveNetworkInterfaces()
+                NetworkInterface networkInterface = GetActiveNetworkInterfaces()
                     .FirstOrDefault(ni => ni.Name == adapterName);
                     
                 if (networkInterface == null)
@@ -267,14 +342,14 @@ namespace Hian.NetworkUtilities
                     return string.Empty;
                 }
 
-                var ipProperties = networkInterface.GetIPProperties();
+                IPInterfaceProperties ipProperties = networkInterface.GetIPProperties();
                 if (ipProperties == null)
                 {
                     Debug.LogError($"[NetworkUtility] Failed to get IP properties for adapter '{adapterName}'");
                     return string.Empty;
                 }
 
-                var address = ipProperties.UnicastAddresses
+                UnicastIPAddressInformation address = ipProperties.UnicastAddresses
                     .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
                     
                 if (address == null)
@@ -303,7 +378,7 @@ namespace Hian.NetworkUtilities
         /// <param name="timeout">제한 시간 (밀리초)</param>
         /// <returns>ping 테스트 결과</returns>
         /// <exception cref="ArgumentNullException">host가 null인 경우</exception>
-        /// <exception cref="ArgumentException">host가 빈 문자열인 경우</exception>
+        /// <exception cref="ArgumentException">host��� 빈 문자열인 경우</exception>
         public static PingResult PingHost(string host, int timeout = DEFAULT_TIMEOUT)
         {
             if (host == null)
@@ -315,16 +390,14 @@ namespace Hian.NetworkUtilities
 
             try
             {
-                using (var ping = new Ping())
+                using Ping ping = new Ping();
+                PingReply reply = ping.Send(host, timeout);
+                return new PingResult
                 {
-                    PingReply reply = ping.Send(host, timeout);
-                    return new PingResult
-                    {
-                        IsSuccess = reply.Status == IPStatus.Success,
-                        RoundtripTime = reply.RoundtripTime,
-                        Status = reply.Status
-                    };
-                }
+                    IsSuccess = reply.Status == IPStatus.Success,
+                    RoundtripTime = reply.RoundtripTime,
+                    Status = reply.Status
+                };
             }
             catch (Exception ex)
             {
@@ -340,16 +413,14 @@ namespace Hian.NetworkUtilities
         {
             try
             {
-                using (var ping = new Ping())
-                {
-                    var reply = await ping.SendPingAsync(host, timeout);
+                using Ping ping = new Ping();
+                var reply = await ping.SendPingAsync(host, timeout);
                     return new PingResult
                     {
                         IsSuccess = reply.Status == IPStatus.Success,
                         RoundtripTime = reply.RoundtripTime,
                         Status = reply.Status
-                    };
-                }
+                };
             }
             catch (Exception ex)
             {
@@ -362,7 +433,7 @@ namespace Hian.NetworkUtilities
     }
 
     /// <summary>
-    /// Ping 테스트 결과를 나타내는 구조체
+    /// Ping 테스트 결과를 나내는 구조체
     /// </summary>
     public struct PingResult
     {
