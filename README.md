@@ -29,6 +29,14 @@ Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
 - 네트워크 타임아웃 설정
 - 상세한 오류 로깅
 
+### HTTP 클라이언트
+- 다양한 HTTP 메서드 지원 (GET, POST, PUT, DELETE, PATCH, HEAD)
+- 자동 재시도 메커니즘
+- 동시 요청 제한
+- 요청 메트릭스 추적
+- 타임아웃 및 취소 기능
+- 동기/비동기 작업 지원
+
 ## 설치 방법
 
 ### UPM을 통한 설치 (Git URL 사용)
@@ -47,7 +55,7 @@ Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
 3. 다음 URL을 입력합니다:
 
 ```text
-https://github.com/creator-hian/Unity-Common.git
+https://github.com/creator-hian/Unity-Network-Utilities.git
 ```
 
 4. 'Add' 버튼을 클릭합니다.
@@ -61,7 +69,7 @@ https://github.com/creator-hian/Unity-Common.git
 ```json
 {
   "dependencies": {
-    // "com.creator-hian.unity.common": "https://github.com/creator-hian/Unity-Common.git",
+    "com.creator-hian.unity.network-utilities": "https://github.com/creator-hian/Unity-Network-Utilities.git",
     ...
   }
 }
@@ -74,7 +82,7 @@ https://github.com/creator-hian/Unity-Common.git
 ```json
 {
   "dependencies": {
-    // "com.creator-hian.unity.common": "https://github.com/creator-hian/Unity-Common.git#0.0.1",
+    "com.creator-hian.unity.network-utilities": "https://github.com/creator-hian/Unity-Network-Utilities.git#0.0.1",
     ...
   }
 }
