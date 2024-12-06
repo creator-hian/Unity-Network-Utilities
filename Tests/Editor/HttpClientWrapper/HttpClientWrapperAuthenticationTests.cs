@@ -24,7 +24,9 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// - 성공 상태 코드: 200
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task BasicAuth_WithValidCredentials_ReturnsSuccess()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: HTTP Basic Auth 테스트 구현
         // 1. 유효한 사용자명/비밀번호로 Basic Auth 헤더 생성
@@ -40,7 +42,9 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// - 성공 상태 코드: 200
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task BearerAuth_WithValidToken_ReturnsSuccess() 
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Bearer 토큰 인증 테스트 구현
         // 1. 유효한 Bearer 토큰으로 Authorization 헤더 설정
@@ -56,7 +60,9 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// - 성공 상태 코드: 200
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task DigestAuth_WithValidCredentials_ReturnsSuccess()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Digest 인증 테스트 구현
         // 1. 유효한 사용자명/비밀번호로 Digest Auth 구현
@@ -72,7 +78,9 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// - 성공 상태 코드: 200
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task DigestAuthWithAlgorithm_WithValidCredentials_ReturnsSuccess()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 알고리즘이 지정된 Digest 인증 테스트 구현
         // 1. 유효한 사용자명/비밀번호와 알고리즘으로 Digest Auth 구현
@@ -89,7 +97,9 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// - 실패 상태 코드: 401/403
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task HiddenBasicAuth_WithValidCredentials_ReturnsSuccess()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Hidden Basic Auth 테스트 구현
         // 1. 유효한 사용자명/비밀번호로 Basic Auth 헤더 생성

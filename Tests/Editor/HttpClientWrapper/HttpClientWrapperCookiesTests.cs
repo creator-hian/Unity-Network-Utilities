@@ -1,8 +1,5 @@
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Hian.NetworkUtilities;
 
 /// <summary>
 /// httpbin.org의 Cookies API를 테스트합니다.
@@ -26,7 +23,9 @@ public class HttpClientWrapperCookiesTests : HttpClientWrapperTestBase
     /// - 응답: 쿠키 데이터를 포함한 JSON
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Cookies_ReturnsCurrentCookies()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 쿠키 조회 테스트 구현
         // 1. 테스트용 쿠키 설정
@@ -44,7 +43,9 @@ public class HttpClientWrapperCookiesTests : HttpClientWrapperTestBase
     /// - 응답: 리다이렉트 (쿠키 목록으로)
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task CookiesDelete_RemovesSpecifiedCookies()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 쿠키 삭제 테스트 구현
         // 1. 테스트용 쿠키 설정
@@ -62,7 +63,9 @@ public class HttpClientWrapperCookiesTests : HttpClientWrapperTestBase
     /// - 응답: 리다이렉트 (쿠키 목록으로)
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task CookiesSet_SetsMultipleCookies()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 쿠키 설정 테스트 구현 (쿼리 문자열)
         // 1. 설정할 쿠키 데��터 준비
@@ -78,7 +81,9 @@ public class HttpClientWrapperCookiesTests : HttpClientWrapperTestBase
     /// - 응답: 리다이렉트 (쿠키 목록으로)
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task CookiesSetNamed_SetsSingleCookie()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 쿠키 설정 테스트 구현 (이름/값)
         // 1. 설정할 쿠키 이름과 값 준비
@@ -94,7 +99,9 @@ public class HttpClientWrapperCookiesTests : HttpClientWrapperTestBase
     /// - 설명: 여러 요청에 걸쳐 쿠키가 유지되는지 확인
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Cookies_PersistAcrossRequests()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 쿠키 지속성 테스트 구현
         // 1. 쿠키 설정

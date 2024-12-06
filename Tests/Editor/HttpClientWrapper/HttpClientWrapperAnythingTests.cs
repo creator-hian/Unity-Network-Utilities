@@ -1,8 +1,5 @@
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Hian.NetworkUtilities;
 
 /// <summary>
 /// httpbin.org의 Anything API를 테스트합니다.
@@ -24,7 +21,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: DELETE
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Anything_Delete_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: DELETE 요청 테스트 구현
         // 1. 테스트용 요청 데이터 준비
@@ -40,7 +39,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: GET
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Anything_Get_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: GET 요청 테스트 구현
         // 1. 테스트용 쿼리 파라미터 준비
@@ -56,7 +57,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: PATCH
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Anything_Patch_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: PATCH 요청 테스트 구현
         // 1. 테스트용 요청 데이터 준비
@@ -72,7 +75,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: POST
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Anything_Post_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: POST 요청 테스트 구현
         // 1. 테스트용 요청 데이터 준비
@@ -88,7 +93,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: PUT
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Anything_Put_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: PUT 요청 테스트 구현
         // 1. 테스트용 요청 데이터 준비
@@ -106,7 +113,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: DELETE
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task AnythingWithPath_Delete_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 경로 파라미터 DELETE 테스트 구현
         // 1. 테스트용 경로 파라미터와 요청 데이터 준비
@@ -122,7 +131,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: GET
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task AnythingWithPath_Get_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 경로 파라미터 GET 테스트 구현
         // 1. 테스트용 경로 파라미터와 쿼리 파라미터 준비
@@ -138,7 +149,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: PATCH
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task AnythingWithPath_Patch_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 경로 파라미터 PATCH 테스트 구현
         // 1. 테스트용 경로 파라미터와 요청 데이터 준비
@@ -154,7 +167,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: POST
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task AnythingWithPath_Post_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 경로 파라미터 POST 테스트 구현
         // 1. 테스트용 경로 파라미터와 요청 데이터 준비
@@ -170,7 +185,9 @@ public class HttpClientWrapperAnythingTests : HttpClientWrapperTestBase
     /// - 메서드: PUT
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task AnythingWithPath_Put_ReturnsRequestData()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 경로 파라미터 PUT 테스트 구현
         // 1. 테스트용 경로 파라미터와 요청 데이터 준비

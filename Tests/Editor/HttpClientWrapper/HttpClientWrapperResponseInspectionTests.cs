@@ -22,7 +22,9 @@ public class HttpClientWrapperResponseInspectionTests : HttpClientWrapperTestBas
     /// - 응답: 조건부 요청 시 304, 그 외에는 일반 GET과 동일
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Cache_WithConditionalHeaders_Returns304()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Cache 테스트 구현
         // 1. If-Modified-Since 또는 If-None-Match 헤더 설정
@@ -38,7 +40,9 @@ public class HttpClientWrapperResponseInspectionTests : HttpClientWrapperTestBas
     /// - 응답: Cache-Control 헤더가 설정된 응답
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task CacheControl_SetsHeaderForSpecifiedDuration()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Cache Control 테스트 구현
         // 1. /cache/{seconds} 엔드포인트 호출
@@ -55,7 +59,9 @@ public class HttpClientWrapperResponseInspectionTests : HttpClientWrapperTestBas
     /// - 응답: 조건에 따른 적절한 상태 코드
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ETag_HandlesConditionalRequests()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: ETag 테스트 구현
         // 1. 특정 ETag 값으로 /etag/{etag} 엔드포인트 호출
@@ -73,7 +79,9 @@ public class HttpClientWrapperResponseInspectionTests : HttpClientWrapperTestBas
     /// - 응답: 설정된 헤더를 포함한 응답
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ResponseHeaders_Get_ReturnsSpecifiedHeaders()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Response Headers GET 테스트 구현
         // 1. 쿼리 문자열에 헤더 정보 포함하여 요청
@@ -89,7 +97,9 @@ public class HttpClientWrapperResponseInspectionTests : HttpClientWrapperTestBas
     /// - 응답: 설정된 헤더를 포함한 응답
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ResponseHeaders_Post_ReturnsSpecifiedHeaders()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Response Headers POST 테스트 구현
         // 1. 쿼리 문자열에 헤더 정보 포함하여 요청

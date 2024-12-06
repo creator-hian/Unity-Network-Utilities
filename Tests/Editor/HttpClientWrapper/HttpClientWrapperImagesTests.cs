@@ -1,8 +1,5 @@
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Hian.NetworkUtilities;
 
 /// <summary>
 /// httpbin.org의 Images API를 테스트합니다.
@@ -27,7 +24,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 응답: Accept 헤더에 지정된 형식의 이미지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Image_ReturnsAcceptedFormat()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 일반 이미지 테스트 구현
         // 1. Accept 헤더 설정 (image/png, image/jpeg 등)
@@ -45,7 +44,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 응답: JPEG 이미지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ImageJpeg_ReturnsJpegImage()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: JPEG 이미지 테스트 구현
         // 1. /image/jpeg 엔드포인트 호출
@@ -60,7 +61,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 응답: PNG 이미지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ImagePng_ReturnsPngImage()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: PNG 이미지 테스트 구현
         // 1. /image/png 엔드포인트 호출
@@ -75,7 +78,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 응��: SVG 이미지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ImageSvg_ReturnsSvgImage()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: SVG 이미지 테스트 구현
         // 1. /image/svg 엔드포인트 호출
@@ -90,7 +95,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 응답: WebP 이미지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task ImageWebp_ReturnsWebpImage()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: WebP 이미지 테스트 구현
         // 1. /image/webp 엔드포인트 호출
@@ -105,7 +112,9 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
     /// - 설명: 지원하지 않는 이미지 형식 요청 시 처리
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Image_WithUnsupportedFormat_ReturnsError()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 잘못된 형식 요청 테스트 구현
         // 1. 지원하지 않는 이미지 형식으로 Accept 헤더 설정

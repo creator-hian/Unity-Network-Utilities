@@ -1,8 +1,5 @@
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Hian.NetworkUtilities;
 
 /// <summary>
 /// httpbin.org의 Dynamic Data API를 테스트합니다.
@@ -31,7 +28,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: 디코딩된 데이터
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Base64_DecodesEncodedString()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Base64 디코딩 테스트 구현
         // 1. Base64 인코딩된 테스트 문자열 준비
@@ -48,7 +47,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: 랜덤 바이트 데이터
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task RandomBytes_ReturnsSpecifiedSize()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 랜덤 바이트 테스트 구현
         // 1. 요청할 바이트 크기 지정
@@ -67,7 +68,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 제한: 최대 10초
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Delay_Get_ReturnsAfterSpecifiedTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: GET 지연 응답 테스트 구현
         // 1. 지연 시간 지정
@@ -83,7 +86,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 제한: 최대 10초
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Delay_Delete_ReturnsAfterSpecifiedTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: DELETE 지연 응답 테스트 구현
         // 1. 지연 시간 지정
@@ -99,7 +104,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 제한: 최대 10초
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Delay_Patch_ReturnsAfterSpecifiedTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: PATCH 지연 응답 테스트 구현
         // 1. 지연 시간 지정
@@ -115,7 +122,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 제한: 최대 10초
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Delay_Post_ReturnsAfterSpecifiedTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: POST 지연 응답 테스트 구현
         // 1. 지연 시간 지정
@@ -131,7 +140,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 제한: 최대 10초
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Delay_Put_ReturnsAfterSpecifiedTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: PUT 지연 응답 테스트 구현
         // 1. 지연 시간 지정
@@ -148,7 +159,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: 시간에 걸쳐 전송되는 데이터
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Drip_StreamsDataOverTime()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 데이터 드립 테스트 구현
         // 1. 드립 파라미터 설정 (duration, numbytes, delay 등)
@@ -163,7 +176,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: HTML 페이지
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Links_GeneratesSpecifiedNumberOfLinks()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 링크 페이지 테스트 구현
         // 1. 링크 수와 오프셋 지정
@@ -178,7 +193,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: 청크 단위 스트림 데이터
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Range_StreamsDataInChunks()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 범위 스트리밍 테스트 구현
         // 1. 전체 바이트 수와 청크 크기 지정
@@ -194,7 +211,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: 청크 단위 바이트 스트림
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task StreamBytes_StreamsSpecifiedAmount()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: 바이트 스트리밍 테스트 구현
         // 1. 스트림할 바이트 수 지정
@@ -210,7 +229,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: JSON 응답 스트림
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Stream_ReturnsMultipleJsonResponses()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: JSON 스트리밍 테스트 구현
         // 1. 스트림할 JSON 응답 수 지정
@@ -228,7 +249,9 @@ public class HttpClientWrapperDynamicDataTests : HttpClientWrapperTestBase
     /// - 응답: UUID
     /// </summary>
     [Test]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task Uuid_ReturnsValidUuid()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: UUID 테스트 구현
         // 1. /uuid 엔드포인트 호출
