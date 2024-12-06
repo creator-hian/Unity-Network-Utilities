@@ -193,7 +193,7 @@ public class NetworkUtilityTests
     /// </summary>
     /// <remarks>
     /// null 어댑터 이름으로 호출 시:
-    /// 1. 에��� 로그가 발생하는지 확인
+    /// 1. 에러 로그가 발생하는지 확인
     /// 2. 빈 문자열을 반환하는지 확인
     /// </remarks>
     [Test]
