@@ -1,0 +1,25 @@
+{
+    "name": "Creator-Hian.Unity.Network-Utilities.Tests.Editor",
+    "rootNamespace": "Creator-Hian.Unity.Network-Utilities.Tests.Editor",
+    "references": [
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:30302ecc26ede8d43b3dd1ad0c7cd05e",
+        "GUID:1afb01d78fa1f854da5783a6f6e1f17a"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
