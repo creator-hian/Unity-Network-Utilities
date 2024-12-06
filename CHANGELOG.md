@@ -40,6 +40,7 @@ All notable changes to this project will be documented in this file.
   - 취소 토큰 지원
 
 ### Tests Added
+
 - 네트워크 상태 테스트
   - 인터넷 연결 상태 확인 테스트
   - 네트워크 상태 변경 이벤트 테스트
