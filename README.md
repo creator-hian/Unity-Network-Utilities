@@ -41,6 +41,21 @@ Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
 - 타임아웃 및 취소 기능
 - 동기/비동기 작업 지원
 
+### 네트워크 캐시 관리
+
+- LRU(Least Recently Used) 캐시 정책 지원
+- 스레드 안전한 동시성 처리
+- 동기/비동기 작업 지원
+- 자동 만료 및 정리 기능
+- 배치 처리 지원
+- 캐시 통계 모니터링
+- 이벤트 기반 상태 알림
+  - 캐시 추가/제거/만료 이벤트
+- 메모리 관리
+  - 최대 캐시 크기 제한
+  - 자동 정리 타이머
+  - 수동 정리 기능
+
 ## 설치 방법
 
 ### UPM을 통한 설치 (Git URL 사용)
@@ -58,9 +73,9 @@ Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
    ![Package Manager Add Git URL](Document/upm-ui-giturl.png)
 3. 다음 URL을 입력합니다:
 
-  ```text
-  https://github.com/creator-hian/Unity-Network-Utilities.git
-  ```
+```text
+https://github.com/creator-hian/Unity-Network-Utilities.git
+```
 
 4. 'Add' 버튼을 클릭합니다.
 

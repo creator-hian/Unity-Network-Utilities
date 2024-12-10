@@ -39,6 +39,23 @@ All notable changes to this project will be documented in this file.
   - 타임아웃 관리
   - 취소 토큰 지원
 
+- 네트워크 캐시 시스템
+  - NetworkCache 클래스 구현
+    - LRU 캐시 정책
+    - 스레드 안전 보장
+    - 동기/비동기 API
+    - 자동 만료 처리
+  - 캐시 관리 기능
+    - 배치 처리 지원
+    - 타이머 기반 자동 정리
+    - 수동 정리 옵션
+  - 모니터링 및 통계
+    - 캐시 상태 통계
+    - 이벤트 기반 알림
+  - 확장 가능한 구조
+    - INetworkCache 인터페이스
+    - DefaultNetworkCacheProvider 구현
+
 ### Tests Added
 
 - 네트워크 상태 테스트
