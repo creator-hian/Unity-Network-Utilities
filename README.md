@@ -76,10 +76,11 @@ Unity 프로젝트를 위한 네트워크 유틸리티 패키지입니다.
 ```text
 https://github.com/creator-hian/Unity-Network-Utilities.git
 ```
-
+<!-- markdownlint-disable MD029 -->
 4. 'Add' 버튼을 클릭합니다.
 
    ![Package Manager Add Button](https://i.imgur.com/yIiD4tT.png)
+<!-- markdownlint-enable MD029 -->
 
 #### 설치 방법 2: manifest.json 직접 수정
 
