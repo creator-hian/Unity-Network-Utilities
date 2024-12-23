@@ -1,13 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Threading;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Hian.NetworkUtilities
 {
@@ -35,8 +35,8 @@ namespace Hian.NetworkUtilities
             {
                 lock (_responseTimes)
                 {
-                    return _responseTimes.Count > 0 
-                        ? TimeSpan.FromTicks((long)_responseTimes.Average(t => t.Ticks)) 
+                    return _responseTimes.Count > 0
+                        ? TimeSpan.FromTicks((long)_responseTimes.Average(static t => t.Ticks))
                         : TimeSpan.Zero;
                 }
             }
@@ -56,13 +56,15 @@ namespace Hian.NetworkUtilities
             _settings = settings ?? HttpClientSettings.Default;
             _settings.Validate();
 
-            var handler = _settings.Handler ?? new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.None,
-                AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 50,
-                UseCookies = true
-            };
+            HttpClientHandler handler =
+                _settings.Handler
+                ?? new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.None,
+                    AllowAutoRedirect = true,
+                    MaxAutomaticRedirections = 50,
+                    UseCookies = true,
+                };
 
             _client = client ?? new HttpClient(handler);
             _ownsClient = client == null;
@@ -82,14 +84,19 @@ namespace Hian.NetworkUtilities
 
         private void TrackRequestMetrics(TimeSpan duration, bool isSuccess)
         {
-            Interlocked.Increment(ref _totalRequests);
+            _ = Interlocked.Increment(ref _totalRequests);
             if (!isSuccess)
-                Interlocked.Increment(ref _failedRequests);
+            {
+                _ = Interlocked.Increment(ref _failedRequests);
+            }
+
             lock (_responseTimes)
             {
                 _responseTimes.Add(duration);
                 if (_responseTimes.Count > _settings.MaxMetricsCount)
+                {
                     _responseTimes.RemoveAt(0);
+                }
             }
         }
 
@@ -97,7 +104,10 @@ namespace Hian.NetworkUtilities
         {
             ThrowIfDisposed();
             if (string.IsNullOrEmpty(name))
+            {
                 throw new ArgumentNullException(nameof(name));
+            }
+
             _client.DefaultRequestHeaders.Add(name, value);
         }
 
@@ -105,57 +115,74 @@ namespace Hian.NetworkUtilities
         {
             ThrowIfDisposed();
             if (string.IsNullOrEmpty(name))
+            {
                 throw new ArgumentNullException(nameof(name));
-            _client.DefaultRequestHeaders.Remove(name);
+            }
+
+            _ = _client.DefaultRequestHeaders.Remove(name);
         }
 
         public async Task WaitForPendingRequestsAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             await _semaphore.WaitAsync(cancellationToken);
-            _semaphore.Release();
+            _ = _semaphore.Release();
         }
 
-        public async Task<string> GetAsync(string url, CancellationToken cancellationToken = default)
+        public async Task<string> GetAsync(
+            string url,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () => 
-                {
-                    try
+                string result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        var response = await _client.GetAsync(url, linkedCts.Token);
-                        var content = await response.Content.ReadAsStringAsync();
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {content}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            HttpResponseMessage response = await _client.GetAsync(
+                                url,
+                                linkedCts.Token
+                            );
+                            string content = await response.Content.ReadAsStringAsync();
 
-                        return content;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {content}"
+                                );
+                            }
+
+                            return content;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -165,47 +192,68 @@ namespace Hian.NetworkUtilities
             }
         }
 
-        public async Task<string> PostAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default)
+        public async Task<string> PostAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () =>
-                {
-                    try
+                string result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        var stringContent = new StringContent(content, Encoding.UTF8, contentType);
-                        var response = await _client.PostAsync(url, stringContent, linkedCts.Token);
-                        var responseContent = await response.Content.ReadAsStringAsync();
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {responseContent}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            StringContent stringContent = new StringContent(
+                                content,
+                                Encoding.UTF8,
+                                contentType
+                            );
+                            HttpResponseMessage response = await _client.PostAsync(
+                                url,
+                                stringContent,
+                                linkedCts.Token
+                            );
+                            string responseContent = await response.Content.ReadAsStringAsync();
 
-                        return responseContent;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {responseContent}"
+                                );
+                            }
+
+                            return responseContent;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -215,47 +263,68 @@ namespace Hian.NetworkUtilities
             }
         }
 
-        public async Task<string> PutAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default)
+        public async Task<string> PutAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () =>
-                {
-                    try
+                string result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        var stringContent = new StringContent(content, Encoding.UTF8, contentType);
-                        var response = await _client.PutAsync(url, stringContent, linkedCts.Token);
-                        var responseContent = await response.Content.ReadAsStringAsync();
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {responseContent}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            StringContent stringContent = new StringContent(
+                                content,
+                                Encoding.UTF8,
+                                contentType
+                            );
+                            HttpResponseMessage response = await _client.PutAsync(
+                                url,
+                                stringContent,
+                                linkedCts.Token
+                            );
+                            string responseContent = await response.Content.ReadAsStringAsync();
 
-                        return responseContent;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {responseContent}"
+                                );
+                            }
+
+                            return responseContent;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -265,46 +334,60 @@ namespace Hian.NetworkUtilities
             }
         }
 
-        public async Task<string> DeleteAsync(string url, CancellationToken cancellationToken = default)
+        public async Task<string> DeleteAsync(
+            string url,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () =>
-                {
-                    try
+                string result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        var response = await _client.DeleteAsync(url, linkedCts.Token);
-                        var responseContent = await response.Content.ReadAsStringAsync();
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {responseContent}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            HttpResponseMessage response = await _client.DeleteAsync(
+                                url,
+                                linkedCts.Token
+                            );
+                            string responseContent = await response.Content.ReadAsStringAsync();
 
-                        return responseContent;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {responseContent}"
+                                );
+                            }
+
+                            return responseContent;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -314,49 +397,74 @@ namespace Hian.NetworkUtilities
             }
         }
 
-        
-        public async Task<string> PatchAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default)
+        public async Task<string> PatchAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () =>
-                {
-                    try
+                string result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        using var stringContent = new StringContent(content, Encoding.UTF8, contentType);
-                        using var request = new HttpRequestMessage(new HttpMethod("PATCH"), url) { Content = stringContent };
-                        var response = await _client.SendAsync(request, linkedCts.Token);
-                        var responseContent = await response.Content.ReadAsStringAsync();
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {responseContent}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            using StringContent stringContent = new StringContent(
+                                content,
+                                Encoding.UTF8,
+                                contentType
+                            );
+                            using HttpRequestMessage request = new HttpRequestMessage(
+                                new HttpMethod("PATCH"),
+                                url
+                            )
+                            {
+                                Content = stringContent,
+                            };
+                            HttpResponseMessage response = await _client.SendAsync(
+                                request,
+                                linkedCts.Token
+                            );
+                            string responseContent = await response.Content.ReadAsStringAsync();
 
-                        return responseContent;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {responseContent}"
+                                );
+                            }
+
+                            return responseContent;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -366,47 +474,64 @@ namespace Hian.NetworkUtilities
             }
         }
 
-        public async Task<HttpResponseMessage> HeadAsync(string url, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> HeadAsync(
+            string url,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
             bool success = false;
             try
             {
-                var result = await ExecuteWithRetryAndSemaphoreAsync(async () =>
-                {
-                    try
+                HttpResponseMessage result = await ExecuteWithRetryAndSemaphoreAsync(
+                    async () =>
                     {
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
-                        var request = new HttpRequestMessage(HttpMethod.Head, url);
-                        var response = await _client.SendAsync(request, linkedCts.Token);
-
-                        if (!response.IsSuccessStatusCode)
+                        try
                         {
-                            var content = await response.Content.ReadAsStringAsync();
-                            throw new HttpRequestException(
-                                $"Request failed: {response.StatusCode} - {content}");
-                        }
+                            using CancellationTokenSource linkedCts =
+                                CancellationTokenSource.CreateLinkedTokenSource(
+                                    _cts.Token,
+                                    cancellationToken
+                                );
+                            HttpRequestMessage request = new HttpRequestMessage(
+                                HttpMethod.Head,
+                                url
+                            );
+                            HttpResponseMessage response = await _client.SendAsync(
+                                request,
+                                linkedCts.Token
+                            );
 
-                        return response;
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        throw new HttpRequestException("Request was cancelled");
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new HttpRequestException("Request timed out");
-                    }
-                    catch (HttpRequestException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new HttpRequestException("Request failed", ex);
-                    }
-                }, cancellationToken);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                string content = await response.Content.ReadAsStringAsync();
+                                throw new HttpRequestException(
+                                    $"Request failed: {response.StatusCode} - {content}"
+                                );
+                            }
+
+                            return response;
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            throw new HttpRequestException("Request was cancelled");
+                        }
+                        catch (TimeoutException)
+                        {
+                            throw new HttpRequestException("Request timed out");
+                        }
+                        catch (HttpRequestException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new HttpRequestException("Request failed", ex);
+                        }
+                    },
+                    cancellationToken
+                );
                 success = true;
                 return result;
             }
@@ -420,8 +545,10 @@ namespace Hian.NetworkUtilities
         {
             ThrowIfDisposed();
             if (milliseconds <= 0)
+            {
                 throw new ArgumentException("Timeout must be greater than 0", nameof(milliseconds));
-            
+            }
+
             if (_client != _defaultClient)
             {
                 _client.Timeout = TimeSpan.FromMilliseconds(milliseconds);
@@ -445,11 +572,16 @@ namespace Hian.NetworkUtilities
         private TimeSpan CalculateRetryDelay(int retryCount)
         {
             const int maxDelayMinutes = 2;
-            var delay = _settings.RetryDelay.TotalMilliseconds * Math.Pow(2, retryCount - 1);
-            return TimeSpan.FromMilliseconds(Math.Min(delay, TimeSpan.FromMinutes(maxDelayMinutes).TotalMilliseconds));
+            double delay = _settings.RetryDelay.TotalMilliseconds * Math.Pow(2, retryCount - 1);
+            return TimeSpan.FromMilliseconds(
+                Math.Min(delay, TimeSpan.FromMinutes(maxDelayMinutes).TotalMilliseconds)
+            );
         }
 
-        private async Task<T> ExecuteWithRetryAsync<T>(Func<Task<T>> action, CancellationToken cancellationToken)
+        private async Task<T> ExecuteWithRetryAsync<T>(
+            Func<Task<T>> action,
+            CancellationToken cancellationToken
+        )
         {
             int retryCount = 0;
             Exception lastException = null;
@@ -458,28 +590,35 @@ namespace Hian.NetworkUtilities
             {
                 try
                 {
-                    var result = await action();
+                    T result = await action();
                     return result;
                 }
                 catch (HttpRequestException httpEx)
                 {
                     // RetryableStatusCodes 설정을 활용하도록 수정
-                    var statusCode = GetStatusCodeFromException(httpEx);
-                    if (statusCode.HasValue && _settings.RetryableStatusCodes.Contains(statusCode.Value))
+                    HttpStatusCode? statusCode = GetStatusCodeFromException(httpEx);
+                    if (
+                        statusCode.HasValue
+                        && _settings.RetryableStatusCodes.Contains(statusCode.Value)
+                    )
                     {
                         lastException = httpEx;
                         retryCount++;
 
                         if (retryCount <= _settings.RetryCount)
                         {
-                            Debug.LogWarning($"Request failed, retrying ({retryCount}/{_settings.RetryCount}): {httpEx.Message}");
-                            var delay = CalculateRetryDelay(retryCount);
+                            Debug.LogWarning(
+                                $"Request failed, retrying ({retryCount}/{_settings.RetryCount}): {httpEx.Message}"
+                            );
+                            TimeSpan delay = CalculateRetryDelay(retryCount);
                             await Task.Delay(delay, cancellationToken);
                             continue;
                         }
                     }
 
-                    Debug.LogWarning($"Request failed with non-retryable status code {statusCode}: {httpEx.Message}");
+                    Debug.LogWarning(
+                        $"Request failed with non-retryable status code {statusCode}: {httpEx.Message}"
+                    );
                     throw;
                 }
             }
@@ -491,23 +630,32 @@ namespace Hian.NetworkUtilities
         {
             // InternalServerError 문자열을 체크
             if (ex.Message.Contains("InternalServerError"))
+            {
                 return HttpStatusCode.InternalServerError;
-            
+            }
+
             // 숫자로 된 상태 코드를 찾아서 파싱
-            var statusCodeMatch = Regex.Match(ex.Message, @"\b(\d{3})\b");
-            if (statusCodeMatch.Success && int.TryParse(statusCodeMatch.Groups[1].Value, out int statusCode))
+            Match statusCodeMatch = Regex.Match(ex.Message, @"\b(\d{3})\b");
+            if (
+                statusCodeMatch.Success
+                && int.TryParse(statusCodeMatch.Groups[1].Value, out int statusCode)
+            )
             {
                 return (HttpStatusCode)statusCode;
             }
-            
+
             return null;
         }
 
-        private async Task<T> ExecuteWithRetryAndSemaphoreAsync<T>(Func<Task<T>> action, CancellationToken cancellationToken)
+        private async Task<T> ExecuteWithRetryAndSemaphoreAsync<T>(
+            Func<Task<T>> action,
+            CancellationToken cancellationToken
+        )
         {
             ThrowIfDisposed();
-            
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
+
+            using CancellationTokenSource linkedCts =
+                CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cancellationToken);
             await _semaphore.WaitAsync(linkedCts.Token);
             try
             {
@@ -515,22 +663,28 @@ namespace Hian.NetworkUtilities
             }
             finally
             {
-                _semaphore.Release();
+                _ = _semaphore.Release();
             }
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             if (disposing)
             {
                 CancelPendingRequests();
                 _cts.Dispose();
                 _semaphore.Dispose();
-                if (_ownsClient) _client.Dispose();
+                if (_ownsClient)
+                {
+                    _client.Dispose();
+                }
             }
-            
+
             _disposed = true;
         }
 
@@ -544,7 +698,9 @@ namespace Hian.NetworkUtilities
         private void ThrowIfDisposed()
         {
             if (_disposed)
+            {
                 throw new ObjectDisposedException(nameof(HttpClientWrapper));
+            }
         }
 
         ~HttpClientWrapper()
@@ -552,4 +708,4 @@ namespace Hian.NetworkUtilities
             Dispose(false);
         }
     }
-} 
+}

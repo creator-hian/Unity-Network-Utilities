@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 /// <summary>
 /// httpbin.org의 Response Formats API를 테스트합니다.
-/// 
+///
 /// 테스트 대상 API:
 /// - Brotli (/brotli) - Brotli 압축 데이터 응답
 /// - Deflate (/deflate) - Deflate 압축 데이터 응답
@@ -14,7 +14,7 @@ using NUnit.Framework;
 /// - JSON (/json) - JSON 문서 응답
 /// - Robots.txt (/robots.txt) - robots.txt 규칙 응답
 /// - XML (/xml) - XML 문서 응답
-/// 
+///
 /// 각 엔드포인트는 다양한 형식의 응답을 테스트하기 위한 목적으로 사용됩니다.
 /// </summary>
 [TestFixture]
@@ -185,4 +185,4 @@ public class HttpClientWrapperResponseFormatsTests : HttpClientWrapperTestBase
         // 3. 접근 거부 메시지 검증
     }
     #endregion
-} 
+}

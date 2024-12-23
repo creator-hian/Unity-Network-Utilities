@@ -3,14 +3,14 @@ using NUnit.Framework;
 
 /// <summary>
 /// httpbin.org의 Images API를 테스트합니다.
-/// 
+///
 /// 테스트 대상 API:
 /// - Generic Image (/image) - Accept 헤더에 따른 이미지 응답
 /// - JPEG Image (/image/jpeg) - JPEG 이미지 응답
 /// - PNG Image (/image/png) - PNG 이미지 응답
 /// - SVG Image (/image/svg) - SVG 이미지 응답
 /// - WebP Image (/image/webp) - WebP 이미지 응답
-/// 
+///
 /// 각 엔드포인트는 다양한 이미지 형식의 응답을 테스트하기 위한 목적으로 사용됩니다.
 /// </summary>
 [TestFixture]
@@ -122,4 +122,4 @@ public class HttpClientWrapperImagesTests : HttpClientWrapperTestBase
         // 3. 적절한 에러 응답 확인
     }
     #endregion
-} 
+}

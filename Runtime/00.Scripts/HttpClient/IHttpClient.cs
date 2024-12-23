@@ -1,7 +1,7 @@
-using System.Net.Http;
-using System.Threading.Tasks;
 using System;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hian.NetworkUtilities
 {
@@ -28,28 +28,45 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// POST 요청을 비동기적으로 수행합니다.
         /// </summary>
-        Task<string> PostAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default);
+        Task<string> PostAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// PUT 요청을 비동기적으로 수행합니다.
         /// </summary>
-        Task<string> PutAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default);
+        Task<string> PutAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// DELETE 요청을 비동기적으로 수행합니다.
         /// </summary>
         Task<string> DeleteAsync(string url, CancellationToken cancellationToken = default);
 
-
         /// <summary>
         /// PATCH 요청을 비동기적으로 수행합니다.
         /// </summary>
-        Task<string> PatchAsync(string url, string content, string contentType = "application/json", CancellationToken cancellationToken = default);
+        Task<string> PatchAsync(
+            string url,
+            string content,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// HEAD 요청을 비동기적으로 수행합니다.
         /// </summary>
-        Task<HttpResponseMessage> HeadAsync(string url, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> HeadAsync(
+            string url,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// 타임아웃을 설정합니다.
@@ -73,6 +90,5 @@ namespace Hian.NetworkUtilities
         bool IsReady { get; }
 
         Task WaitForPendingRequestsAsync(CancellationToken cancellationToken = default);
-
     }
-} 
+}
