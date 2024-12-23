@@ -99,13 +99,15 @@ namespace Hian.NetworkUtilities
         {
             try
             {
-                using (WebClient client = new WebClient())
+                string result = httpClient
+                    .GetStringAsync(MSFT_TEST_URL)
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();
+
+                if (result != MSFT_TEST_RESULT)
                 {
-                    string result = client.DownloadString(MSFT_TEST_URL);
-                    if (result != MSFT_TEST_RESULT)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 IPHostEntry dnsHost = Dns.GetHostEntry(MSFT_DNS);
@@ -386,7 +388,7 @@ namespace Hian.NetworkUtilities
         /// <param name="timeout">제한 시간 (밀리초)</param>
         /// <returns>ping 테스트 결과</returns>
         /// <exception cref="ArgumentNullException">host가 null인 경우</exception>
-        /// <exception cref="ArgumentException">host��� 빈 문자열인 경우</exception>
+        /// <exception cref="ArgumentException">host 빈 문자열인 경우</exception>
         public static PingResult PingHost(string host, int timeout = DEFAULT_TIMEOUT)
         {
             if (host == null)

@@ -25,15 +25,27 @@ namespace Hian.NetworkUtilities
 
         #region Asynchronous Methods
         Task<(bool success, T data)> TryGetCacheAsync<T>(string key);
-        Task SetCacheAsync(string key, object data, float expirationMinutes = 30, CancellationToken cancellationToken = default);
+        Task SetCacheAsync(
+            string key,
+            object data,
+            float expirationMinutes = 30,
+            CancellationToken cancellationToken = default
+        );
         Task RemoveCacheAsync(string key, CancellationToken cancellationToken = default);
         Task ClearCacheAsync(CancellationToken cancellationToken = default);
-        Task UpdateExpirationTimeAsync(string key, float expirationMinutes, CancellationToken cancellationToken = default);
+        Task UpdateExpirationTimeAsync(
+            string key,
+            float expirationMinutes,
+            CancellationToken cancellationToken = default
+        );
         #endregion
 
         #region Cache Management
         void CleanExpiredCache(int batchSize = 100);
-        Task CleanAllExpiredCacheAsync(int batchSize = 100, CancellationToken cancellationToken = default);
+        Task CleanAllExpiredCacheAsync(
+            int batchSize = 100,
+            CancellationToken cancellationToken = default
+        );
         void PauseCleanup();
         void ResumeCleanup(int intervalMinutes = 5);
         CacheStats GetStats();
@@ -48,4 +60,4 @@ namespace Hian.NetworkUtilities
     {
         INetworkCache CreateCache(int maxCacheSize = 1000, int cleanupIntervalMinutes = 5);
     }
-} 
+}
