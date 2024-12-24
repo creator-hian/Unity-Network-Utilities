@@ -85,7 +85,7 @@ namespace Hian.NetworkUtilities
             try
             {
                 using Ping ping = new Ping();
-                var reply = await ping.SendPingAsync(GOOGLE_DNS, _networkTimeout);
+                PingReply reply = await ping.SendPingAsync(GOOGLE_DNS, _networkTimeout);
                 return reply.Status == IPStatus.Success;
             }
             catch (Exception ex)
@@ -108,7 +108,7 @@ namespace Hian.NetworkUtilities
                     }
                 }
 
-                var dnsHost = Dns.GetHostEntry(MSFT_DNS);
+                IPHostEntry dnsHost = Dns.GetHostEntry(MSFT_DNS);
                 return dnsHost.AddressList.Length > 0
                     && dnsHost.AddressList[0].ToString() == MSFT_DNS_IP;
             }
@@ -171,7 +171,7 @@ namespace Hian.NetworkUtilities
                 // 구독 시 현재 상태 즉시 전달
                 value?.Invoke(IsNetworkAvailable());
             }
-            remove { _onNetworkStatusChanged -= value; }
+            remove => _onNetworkStatusChanged -= value;
         }
 
         /// <summary>
@@ -187,9 +187,9 @@ namespace Hian.NetworkUtilities
             try
             {
                 return GetActiveNetworkInterfaces()
-                        .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-                        .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                        .Select(ip => ip.Address.ToString())
+                        .SelectMany(static ni => ni.GetIPProperties().UnicastAddresses)
+                        .Where(static ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        .Select(static ip => ip.Address.ToString())
                         .FirstOrDefault() ?? string.Empty;
             }
             catch (Exception ex)
@@ -222,7 +222,10 @@ namespace Hian.NetworkUtilities
         public static void SetNetworkTimeout(int milliseconds)
         {
             if (milliseconds <= 0)
+            {
                 throw new ArgumentException("Timeout must be greater than 0", nameof(milliseconds));
+            }
+
             _networkTimeout = milliseconds;
         }
 
@@ -243,9 +246,9 @@ namespace Hian.NetworkUtilities
             try
             {
                 return GetActiveNetworkInterfaces()
-                    .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-                    .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                    .Select(ip => ip.Address.ToString())
+                    .SelectMany(static ni => ni.GetIPProperties().UnicastAddresses)
+                    .Where(static ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(static ip => ip.Address.ToString())
                     .ToList();
             }
             catch (Exception ex)
@@ -312,7 +315,7 @@ namespace Hian.NetworkUtilities
         {
             return NetworkInterface
                 .GetAllNetworkInterfaces()
-                .Where(ni => ni.OperationalStatus == OperationalStatus.Up);
+                .Where(static ni => ni.OperationalStatus == OperationalStatus.Up);
         }
 
         /// <summary>
@@ -387,11 +390,19 @@ namespace Hian.NetworkUtilities
         public static PingResult PingHost(string host, int timeout = DEFAULT_TIMEOUT)
         {
             if (host == null)
+            {
                 throw new ArgumentNullException(nameof(host));
+            }
+
             if (string.IsNullOrWhiteSpace(host))
+            {
                 throw new ArgumentException("Host cannot be empty", nameof(host));
+            }
+
             if (timeout <= 0)
+            {
                 throw new ArgumentException("Timeout must be greater than 0", nameof(timeout));
+            }
 
             try
             {
@@ -422,7 +433,7 @@ namespace Hian.NetworkUtilities
             try
             {
                 using Ping ping = new Ping();
-                var reply = await ping.SendPingAsync(host, timeout);
+                PingReply reply = await ping.SendPingAsync(host, timeout);
                 return new PingResult
                 {
                     IsSuccess = reply.Status == IPStatus.Success,
