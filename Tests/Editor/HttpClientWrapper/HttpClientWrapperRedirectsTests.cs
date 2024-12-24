@@ -3,13 +3,13 @@ using NUnit.Framework;
 
 /// <summary>
 /// httpbin.org의 Redirects API를 테스트합니다.
-///
+/// 
 /// 테스트 대상 API:
 /// - Absolute Redirect (/absolute-redirect/{n}) - n회 절대 경로로 리다이렉트
 /// - Relative Redirect (/relative-redirect/{n}) - n회 상대 경로로 리다이렉트
 /// - Redirect (/redirect/{n}) - n회 리다이렉트
 /// - Redirect To (/redirect-to) - 지정된 URL로 리다이렉트 (다양한 HTTP 메서드 지원)
-///
+/// 
 /// 각 엔드포인트는 다양한 리다이렉트 시나리오를 테스트하기 위한 목적으로 사용됩니다.
 /// </summary>
 [TestFixture]
@@ -179,4 +179,4 @@ public class HttpClientWrapperRedirectsTests : HttpClientWrapperTestBase
         // 3. 적절한 에러 메시지 검증
     }
     #endregion
-}
+} 

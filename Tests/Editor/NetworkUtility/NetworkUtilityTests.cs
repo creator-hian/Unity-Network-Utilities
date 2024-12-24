@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Hian.NetworkUtilities;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using System.Threading.Tasks;
+using Hian.NetworkUtilities;
 
 /// <summary>
 /// NetworkUtility 클래스의 기능을 검증하기 위한 테스트 클래스입니다.
@@ -15,6 +15,7 @@ public class NetworkUtilityTests
     private const string TEST_HOST = "8.8.8.8"; // Google DNS for testing
     private const string INVALID_HOST = "invalid.host.address";
     private const string TEST_ADAPTER = "Wi-Fi"; // 실제 테스트 환경에 맞게 수정 필요
+
     #region Network Status Tests
 
     /// <summary>
@@ -120,13 +121,10 @@ public class NetworkUtilityTests
     public void GetLocalIPAddress_ShouldReturnValidLocalIP()
     {
         string localIP = NetworkUtility.GetLocalIPAddress();
-
+        
         Assert.That(localIP, Is.Not.Null);
         Assert.That(localIP, Is.Not.Empty);
-        Assert.That(
-            System.Net.IPAddress.Parse(localIP).AddressFamily,
-            Is.EqualTo(System.Net.Sockets.AddressFamily.InterNetwork)
-        );
+        Assert.That(System.Net.IPAddress.Parse(localIP).AddressFamily, Is.EqualTo(System.Net.Sockets.AddressFamily.InterNetwork));
     }
 
     /// <summary>
@@ -139,8 +137,8 @@ public class NetworkUtilityTests
     public void NetworkStatusChanged_ShouldTriggerEvent()
     {
         bool eventTriggered = false;
-        Action<bool> handler = (isAvailable) => eventTriggered = true;
-        NetworkUtility.NetworkStatusChanged += handler;
+        System.Action<bool> handler = (isAvailable) => eventTriggered = true;
+        NetworkUtility.OnNetworkStatusChanged += handler;
 
         try
         {
@@ -149,7 +147,7 @@ public class NetworkUtilityTests
         }
         finally
         {
-            NetworkUtility.NetworkStatusChanged -= handler;
+            NetworkUtility.OnNetworkStatusChanged -= handler;
         }
     }
 
@@ -164,12 +162,13 @@ public class NetworkUtilityTests
     {
         int timeout = 5000;
         NetworkUtility.SetNetworkTimeout(timeout);
-
+        
         // 타임아웃이 적용된 상태에서 네트워크 작업 수행
         PingResult result = NetworkUtility.PingHost(TEST_HOST);
-
+        
         Assert.That(result.RoundtripTime, Is.LessThanOrEqualTo(timeout));
     }
+
 
     #endregion
 
@@ -233,10 +232,7 @@ public class NetworkUtilityTests
     [UnityTest]
     public IEnumerator PingHost_WithInvalidHost_ShouldFail()
     {
-        LogAssert.Expect(
-            LogType.Error,
-            "[NetworkUtility] Ping failed: Could not resolve host 'invalid.host.address'"
-        );
+        LogAssert.Expect(LogType.Error, "[NetworkUtility] Ping failed: Could not resolve host 'invalid.host.address'");
         PingResult result = NetworkUtility.PingHost(INVALID_HOST);
 
         Assert.That(result.IsSuccess, Is.False);
@@ -264,19 +260,19 @@ public class NetworkUtilityTests
     [Test]
     public void PingHost_WithNullHost_ShouldThrowArgumentNullException()
     {
-        _ = Assert.Throws<ArgumentNullException>(static () => NetworkUtility.PingHost(null));
+        Assert.Throws<ArgumentNullException>(() => NetworkUtility.PingHost(null));
     }
 
     [Test]
     public void PingHost_WithEmptyHost_ShouldThrowArgumentException()
     {
-        _ = Assert.Throws<ArgumentException>(static () => NetworkUtility.PingHost(""));
+        Assert.Throws<ArgumentException>(() => NetworkUtility.PingHost(""));
     }
 
     [Test]
     public void PingHost_WithInvalidTimeout_ShouldThrowArgumentException()
     {
-        _ = Assert.Throws<ArgumentException>(static () => NetworkUtility.PingHost(TEST_HOST, 0));
+        Assert.Throws<ArgumentException>(() => NetworkUtility.PingHost(TEST_HOST, 0));
     }
 
     #endregion

@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
-
 /// <summary>
 /// httpbin.org의 Request Inspection API를 테스트합니다.
 /// </summary>
@@ -24,13 +23,13 @@ public class HttpClientWrapperRequestInspectionTests : HttpClientWrapperTestBase
         // Arrange
         const string headerName = "X-Custom-Header";
         const string headerValue = "TestValue";
-        string expectedJson = $"{{\"headers\":{{\"X-Custom-Header\":\"{headerValue}\"}}}}";
-
+        var expectedJson = $"{{\"headers\":{{\"X-Custom-Header\":\"{headerValue}\"}}}}";
+        
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
         _wrapper.AddDefaultHeader(headerName, headerValue);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/headers");
+        var result = await _wrapper.GetAsync("http://httpbin.org/headers");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -49,11 +48,11 @@ public class HttpClientWrapperRequestInspectionTests : HttpClientWrapperTestBase
     public async Task IP_ReturnsRequestersIPAddress()
     {
         // Arrange
-        string expectedJson = "{\"origin\":\"127.0.0.1\"}";
+        var expectedJson = "{\"origin\":\"127.0.0.1\"}";
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/ip");
+        var result = await _wrapper.GetAsync("http://httpbin.org/ip");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -73,13 +72,13 @@ public class HttpClientWrapperRequestInspectionTests : HttpClientWrapperTestBase
     {
         // Arrange
         const string userAgent = "Unity-HttpClient/1.0";
-        string expectedJson = $"{{\"user-agent\":\"{userAgent}\"}}";
-
+        var expectedJson = $"{{\"user-agent\":\"{userAgent}\"}}";
+        
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
         _wrapper.AddDefaultHeader("User-Agent", userAgent);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/user-agent");
+        var result = await _wrapper.GetAsync("http://httpbin.org/user-agent");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -94,10 +93,9 @@ public class HttpClientWrapperRequestInspectionTests : HttpClientWrapperTestBase
     public void Headers_WithInvalidValue_ThrowsException()
     {
         // Arrange & Act & Assert
-        Assert.That(
-            () => _wrapper.AddDefaultHeader("Invalid\nHeader", "Value"),
-            Throws.Exception.TypeOf<FormatException>().With.Message.Contains("Invalid")
-        );
+        Assert.That(() => _wrapper.AddDefaultHeader("Invalid\nHeader", "Value"),
+            Throws.Exception.TypeOf<FormatException>()
+            .With.Message.Contains("Invalid"));
     }
 
     /// <summary>
@@ -107,18 +105,18 @@ public class HttpClientWrapperRequestInspectionTests : HttpClientWrapperTestBase
     public async Task RequestInspection_ServerError_ThrowsException()
     {
         // Arrange
-        _ = new HttpResponseMessage(HttpStatusCode.BadGateway)
+        var errorResponse = new HttpResponseMessage(HttpStatusCode.BadGateway)
         {
             Content = new StringContent("Bad Gateway"),
             StatusCode = HttpStatusCode.BadGateway,
-            ReasonPhrase = "Bad Gateway",
+            ReasonPhrase = "Bad Gateway"
         };
         _mockHandler.SetupResponse(HttpStatusCode.BadGateway, "Bad Gateway");
 
         try
         {
             // Act
-            _ = await _wrapper.GetAsync("http://httpbin.org/headers");
+            await _wrapper.GetAsync("http://httpbin.org/headers");
             Assert.Fail("Expected HttpRequestException was not thrown");
         }
         catch (HttpRequestException ex)

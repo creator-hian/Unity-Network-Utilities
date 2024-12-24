@@ -1,15 +1,14 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
-
 /// <summary>
 /// httpbin.org의 Response Inspection API를 테스트합니다.
-///
+/// 
 /// 테스트 대상 API:
 /// - Cache (/cache) - If-Modified-Since/If-None-Match 헤더에 따른 304 응답 테스트
 /// - Cache Control (/cache/{value}) - Cache-Control 헤더 설정 테스트
 /// - ETag (/etag/{etag}) - ETag 기반 조건부 요청 테스트
 /// - Response Headers (/response-headers) - 응답 헤더 검사 테스트 (GET/POST)
-///
+/// 
 /// 각 엔드포인트는 HTTP 응답의 다양한 측면을 테스트하기 위한 목적으로 사용됩니다.
 /// </summary>
 [TestFixture]
