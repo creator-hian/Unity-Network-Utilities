@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using NUnit.Framework;
 using Hian.NetworkUtilities;
+using NUnit.Framework;
 
 /// <summary>
 /// NetworkCache 클래스의 기능을 테스트합니다.
@@ -50,11 +50,11 @@ public class NetworkCacheTests
     public void SetAndGetCache_WithValidData_WorksCorrectly()
     {
         // Arrange
-        var testData = "test data";
-        
+        string testData = "test data";
+
         // Act
         _cache.SetCache("test_key", testData);
-        var success = _cache.TryGetCache<string>("test_key", out var result);
+        bool success = _cache.TryGetCache<string>("test_key", out string result);
 
         // Assert
         Assert.That(success, Is.True, "Cache retrieval should be successful");
@@ -76,8 +76,8 @@ public class NetworkCacheTests
         _cache.SetCache("test_key", "test data");
 
         // Act
-        var removed = _cache.RemoveCache("test_key");
-        var exists = _cache.TryGetCache<string>("test_key", out _);
+        bool removed = _cache.RemoveCache("test_key");
+        bool exists = _cache.TryGetCache<string>("test_key", out _);
 
         // Assert
         Assert.That(removed, Is.True, "Cache removal should be successful");
@@ -99,11 +99,11 @@ public class NetworkCacheTests
     {
         // Arrange
         _cache.SetCache("test_key", "data", expirationMinutes: 0.016f); // 1초
-        
+
         // Act
         await Task.Delay(1100); // 1.1초 대기
-        var success = _cache.TryGetCache<string>("test_key", out _);
-        
+        bool success = _cache.TryGetCache<string>("test_key", out _);
+
         // Assert
         Assert.That(success, Is.False);
     }
@@ -122,9 +122,9 @@ public class NetworkCacheTests
     public void CacheEvents_AreTriggeredCorrectly()
     {
         // Arrange
-        var addedTriggered = false;
-        var removedTriggered = false;
-        
+        bool addedTriggered = false;
+        bool removedTriggered = false;
+
         _cache.OnCacheAdded += _ => addedTriggered = true;
         _cache.OnCacheRemoved += _ => removedTriggered = true;
 
@@ -157,7 +157,7 @@ public class NetworkCacheTests
         }
 
         // Assert
-        var hasFirst = _cache.TryGetCache<string>("key_0", out _);
+        bool hasFirst = _cache.TryGetCache<string>("key_0", out _);
         Assert.That(hasFirst, Is.False, "Oldest item should have been evicted");
     }
     #endregion
@@ -175,20 +175,20 @@ public class NetworkCacheTests
     public async Task ConcurrentAccess_IsThreadSafe()
     {
         // Arrange
-        var tasks = new Task[100];
-        var maxCacheSize = _cache.GetStats().MaxCacheSize;
-        var random = new Random();
-        
+        Task[] tasks = new Task[100];
+        int maxCacheSize = _cache.GetStats().MaxCacheSize;
+        Random random = new Random();
+
         // Act
         for (int i = 0; i < tasks.Length; i++)
         {
-            var index = i;
+            int index = i;
             tasks[i] = Task.Run(async () =>
             {
                 try
                 {
                     await Task.Delay(random.Next(1, 10));
-                    var key = $"key_{index % maxCacheSize}";
+                    string key = $"key_{index % maxCacheSize}";
                     _cache.SetCache(key, $"value_{index}");
                     _cache.TryGetCache<string>(key, out _);
                 }
@@ -201,12 +201,18 @@ public class NetworkCacheTests
 
         // Assert
         await Task.WhenAll(tasks);
-        var stats = _cache.GetStats();
-        
-        Assert.That(stats.TotalItems, Is.LessThanOrEqualTo(maxCacheSize), 
-            "Cache size should not exceed maximum");
-        Assert.That(stats.TotalItems, Is.GreaterThan(0), 
-            "Cache should contain items after concurrent operations");
+        CacheStats stats = _cache.GetStats();
+
+        Assert.That(
+            stats.TotalItems,
+            Is.LessThanOrEqualTo(maxCacheSize),
+            "Cache size should not exceed maximum"
+        );
+        Assert.That(
+            stats.TotalItems,
+            Is.GreaterThan(0),
+            "Cache should contain items after concurrent operations"
+        );
     }
     #endregion
-} 
+}

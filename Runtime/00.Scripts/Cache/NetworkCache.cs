@@ -55,10 +55,13 @@ namespace Hian.NetworkUtilities
             _maxCacheSize = maxCacheSize;
             _cache = new ConcurrentDictionary<string, CacheItem>();
             _lruList = new LinkedList<string>();
-            
-            _cleanupTimer = new Timer(CleanupCallback, null, 
-                TimeSpan.FromMinutes(cleanupIntervalMinutes), 
-                TimeSpan.FromMinutes(cleanupIntervalMinutes));
+
+            _cleanupTimer = new Timer(
+                CleanupCallback,
+                null,
+                TimeSpan.FromMinutes(cleanupIntervalMinutes),
+                TimeSpan.FromMinutes(cleanupIntervalMinutes)
+            );
         }
 
         #endregion
@@ -73,20 +76,20 @@ namespace Hian.NetworkUtilities
             }
             catch (Exception ex)
             {
-                    // TODO: Unity Main Thread에서의 처리가 필요하며, 이에 따라 Package Dependency를 추가할지, 어떻게 처리할지 확인이 필요함.
+                // TODO: Unity Main Thread에서의 처리가 필요하며, 이에 따라 Package Dependency를 추가할지, 어떻게 처리할지 확인이 필요함.
                 Debug.LogError($"Cache cleanup failed: {ex.Message}");
             }
         }
 
         private (bool success, CacheItem item) GetValidCacheItem(string key)
         {
-            if (_cache.TryGetValue(key, out var item))
+            if (_cache.TryGetValue(key, out CacheItem item))
             {
                 if (DateTime.UtcNow < item.ExpirationTime)
                 {
                     return (true, item);
                 }
-                RemoveCache(key);
+                _ = RemoveCache(key);
                 InvokeEvent(OnCacheExpired, key);
             }
             return (false, null);
@@ -94,9 +97,12 @@ namespace Hian.NetworkUtilities
 
         private void InvokeEvent(Action<string> eventHandler, string key)
         {
-            if (eventHandler == null) return;
+            if (eventHandler == null)
+            {
+                return;
+            }
 
-            foreach (var handler in eventHandler.GetInvocationList())
+            foreach (Delegate handler in eventHandler.GetInvocationList())
             {
                 try
                 {
@@ -112,18 +118,18 @@ namespace Hian.NetworkUtilities
 
         private (bool success, T data) TryGetCacheInternal<T>(string key)
         {
-            var (success, item) = GetValidCacheItem(key);
+            (bool success, CacheItem item) = GetValidCacheItem(key);
             if (success)
             {
                 try
                 {
-                    var data = (T)item.Data;
+                    T data = (T)item.Data;
                     UpdateLRU(key);
                     return (true, data);
                 }
                 catch (InvalidCastException)
                 {
-                    RemoveCache(key);
+                    _ = RemoveCache(key);
                 }
             }
             return (false, default);
@@ -132,23 +138,23 @@ namespace Hian.NetworkUtilities
         private void AddOrUpdateCacheItem(string key, CacheItem item)
         {
             const int maxRetries = 3;
-            var retryCount = 0;
-            
+            int retryCount = 0;
+
             while (retryCount < maxRetries)
             {
-                var currentCount = _cache.Count;
+                int currentCount = _cache.Count;
                 if (currentCount < _maxCacheSize || _cache.ContainsKey(key))
                 {
-                    _cache.AddOrUpdate(key, item, (_, _) => item);
+                    _ = _cache.AddOrUpdate(key, item, (_, _) => item);
                     UpdateLRU(key);
                     InvokeEvent(OnCacheAdded, key);
                     return;
                 }
-                
+
                 RemoveOldestItem();
                 retryCount++;
             }
-            
+
             throw new InvalidOperationException("Failed to add cache item after maximum retries");
         }
 
@@ -156,12 +162,12 @@ namespace Hian.NetworkUtilities
         {
             lock (_lruLock)
             {
-                var node = _lruList.Find(key);
+                LinkedListNode<string> node = _lruList.Find(key);
                 if (node != null)
                 {
                     _lruList.Remove(node);
                 }
-                _lruList.AddFirst(key);
+                _ = _lruList.AddFirst(key);
             }
         }
 
@@ -171,7 +177,7 @@ namespace Hian.NetworkUtilities
             {
                 if (_lruList.Last != null)
                 {
-                    var oldestKey = _lruList.Last.Value;
+                    string oldestKey = _lruList.Last.Value;
                     _lruList.RemoveLast();
                     if (_cache.TryRemove(oldestKey, out _))
                     {
@@ -195,7 +201,7 @@ namespace Hian.NetworkUtilities
         public bool TryGetCache<T>(string key, out T data)
         {
             ThrowIfDisposed();
-            var result = TryGetCacheInternal<T>(key);
+            (bool success, T data) result = TryGetCacheInternal<T>(key);
             data = result.data;
             return result.success;
         }
@@ -209,12 +215,12 @@ namespace Hian.NetworkUtilities
         public void SetCache(string key, object data, float expirationMinutes = 30)
         {
             ThrowIfDisposed();
-            var now = DateTime.UtcNow;
-            var cacheItem = new CacheItem
+            DateTime now = DateTime.UtcNow;
+            CacheItem cacheItem = new CacheItem
             {
                 Data = data,
                 ExpirationTime = now.AddMinutes(expirationMinutes),
-                CreationTime = now
+                CreationTime = now,
             };
 
             AddOrUpdateCacheItem(key, cacheItem);
@@ -232,7 +238,7 @@ namespace Hian.NetworkUtilities
             {
                 lock (_lruLock)
                 {
-                    _lruList.Remove(key);
+                    _ = _lruList.Remove(key);
                 }
                 InvokeEvent(OnCacheRemoved, key);
                 return true;
@@ -246,13 +252,13 @@ namespace Hian.NetworkUtilities
         public void ClearCache()
         {
             ThrowIfDisposed();
-            var keys = _cache.Keys.ToList();
+            List<string> keys = _cache.Keys.ToList();
             _cache.Clear();
             lock (_lruLock)
             {
                 _lruList.Clear();
             }
-            foreach (var key in keys)
+            foreach (string key in keys)
             {
                 InvokeEvent(OnCacheRemoved, key);
             }
@@ -267,9 +273,9 @@ namespace Hian.NetworkUtilities
         public bool UpdateExpirationTime(string key, float expirationMinutes)
         {
             ThrowIfDisposed();
-            if (_cache.TryGetValue(key, out var item))
+            if (_cache.TryGetValue(key, out CacheItem item))
             {
-                var now = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
                 item.ExpirationTime = now.AddMinutes(expirationMinutes);
                 return _cache.TryUpdate(key, item, item);
             }
@@ -292,26 +298,34 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 캐시에 데이터를 비동기적으로 저장합니다.
         /// </summary>
-        public async Task SetCacheAsync(string key, object data, float expirationMinutes = 30, 
-            CancellationToken cancellationToken = default)
+        public async Task SetCacheAsync(
+            string key,
+            object data,
+            float expirationMinutes = 30,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using CancellationTokenSource linkedCts =
+                CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                var now = DateTime.UtcNow;
-                var cacheItem = new CacheItem
+                DateTime now = DateTime.UtcNow;
+                CacheItem cacheItem = new CacheItem
                 {
                     Data = data,
                     ExpirationTime = now.AddMinutes(expirationMinutes),
-                    CreationTime = now
+                    CreationTime = now,
                 };
 
-                await Task.Run(() => 
-                {
-                    linkedCts.Token.ThrowIfCancellationRequested();
-                    AddOrUpdateCacheItem(key, cacheItem);
-                }, linkedCts.Token);
+                await Task.Run(
+                    () =>
+                    {
+                        linkedCts.Token.ThrowIfCancellationRequested();
+                        AddOrUpdateCacheItem(key, cacheItem);
+                    },
+                    linkedCts.Token
+                );
             }
             catch (OperationCanceledException)
             {
@@ -323,21 +337,27 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 지정된 키의 캐시를 비동기적으로 제거합니다.
         /// </summary>
-        public async Task RemoveCacheAsync(string key, CancellationToken cancellationToken = default)
+        public async Task RemoveCacheAsync(
+            string key,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            await Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (_cache.TryRemove(key, out _))
+            await Task.Run(
+                () =>
                 {
-                    lock (_lruLock)
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_cache.TryRemove(key, out _))
                     {
-                        _lruList.Remove(key);
+                        lock (_lruLock)
+                        {
+                            _ = _lruList.Remove(key);
+                        }
+                        InvokeEvent(OnCacheRemoved, key);
                     }
-                    InvokeEvent(OnCacheRemoved, key);
-                }
-            }, cancellationToken);
+                },
+                cancellationToken
+            );
         }
 
         /// <summary>
@@ -346,39 +366,48 @@ namespace Hian.NetworkUtilities
         public async Task ClearCacheAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
-            await Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var keys = _cache.Keys.ToList();
-                _cache.Clear();
-                lock (_lruLock)
+            await Task.Run(
+                () =>
                 {
-                    _lruList.Clear();
-                }
-                foreach (var key in keys)
-                {
-                    InvokeEvent(OnCacheRemoved, key);
-                }
-            }, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    List<string> keys = _cache.Keys.ToList();
+                    _cache.Clear();
+                    lock (_lruLock)
+                    {
+                        _lruList.Clear();
+                    }
+                    foreach (string key in keys)
+                    {
+                        InvokeEvent(OnCacheRemoved, key);
+                    }
+                },
+                cancellationToken
+            );
         }
 
         /// <summary>
         /// 지정된 키의 캐시 만료 시간을 비동기적으로 업데이트합니다.
         /// </summary>
-        public async Task UpdateExpirationTimeAsync(string key, float expirationMinutes, 
-            CancellationToken cancellationToken = default)
+        public async Task UpdateExpirationTimeAsync(
+            string key,
+            float expirationMinutes,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
-            await Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (_cache.TryGetValue(key, out var item))
+            await Task.Run(
+                () =>
                 {
-                    var now = DateTime.UtcNow;
-                    item.ExpirationTime = now.AddMinutes(expirationMinutes);
-                    _cache.TryUpdate(key, item, item);
-                }
-            }, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_cache.TryGetValue(key, out CacheItem item))
+                    {
+                        DateTime now = DateTime.UtcNow;
+                        item.ExpirationTime = now.AddMinutes(expirationMinutes);
+                        _ = _cache.TryUpdate(key, item, item);
+                    }
+                },
+                cancellationToken
+            );
         }
 
         #endregion
@@ -392,13 +421,16 @@ namespace Hian.NetworkUtilities
         public void CleanExpiredCache(int batchSize = 100)
         {
             ThrowIfDisposed();
-            var now = DateTime.UtcNow;
-            var count = 0;
-            
-            foreach (var kvp in _cache)
+            DateTime now = DateTime.UtcNow;
+            int count = 0;
+
+            foreach (KeyValuePair<string, CacheItem> kvp in _cache)
             {
-                if (count >= batchSize) break;
-                
+                if (count >= batchSize)
+                {
+                    break;
+                }
+
                 if (now >= kvp.Value.ExpirationTime)
                 {
                     if (_cache.TryRemove(kvp.Key, out _))
@@ -406,7 +438,7 @@ namespace Hian.NetworkUtilities
                         count++;
                         lock (_lruLock)
                         {
-                            _lruList.Remove(kvp.Key);
+                            _ = _lruList.Remove(kvp.Key);
                         }
                         InvokeEvent(OnCacheExpired, kvp.Key);
                     }
@@ -417,18 +449,22 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 모든 만료된 캐시를 배치 처리 방식으로 정리합니다.
         /// </summary>
-        public async Task CleanAllExpiredCacheAsync(int batchSize = 100, 
-            CancellationToken cancellationToken = default)
+        public async Task CleanAllExpiredCacheAsync(
+            int batchSize = 100,
+            CancellationToken cancellationToken = default
+        )
         {
             ThrowIfDisposed();
             while (!cancellationToken.IsCancellationRequested)
             {
-                var initialCount = _cache.Count;
+                int initialCount = _cache.Count;
                 CleanExpiredCache(batchSize);
-                
+
                 if (_cache.Count == initialCount)
+                {
                     break;
-                    
+                }
+
                 await Task.Yield();
             }
         }
@@ -439,7 +475,7 @@ namespace Hian.NetworkUtilities
         public void PauseCleanup()
         {
             ThrowIfDisposed();
-            _cleanupTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _ = (_cleanupTimer?.Change(Timeout.Infinite, Timeout.Infinite));
         }
 
         /// <summary>
@@ -449,9 +485,12 @@ namespace Hian.NetworkUtilities
         public void ResumeCleanup(int intervalMinutes = 5)
         {
             ThrowIfDisposed();
-            _cleanupTimer?.Change(
-                TimeSpan.FromMinutes(intervalMinutes),
-                TimeSpan.FromMinutes(intervalMinutes));
+            _ = (
+                _cleanupTimer?.Change(
+                    TimeSpan.FromMinutes(intervalMinutes),
+                    TimeSpan.FromMinutes(intervalMinutes)
+                )
+            );
         }
 
         #endregion
@@ -486,7 +525,7 @@ namespace Hian.NetworkUtilities
             {
                 if (disposing)
                 {
-                    _cleanupTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+                    _ = (_cleanupTimer?.Change(Timeout.Infinite, Timeout.Infinite));
                     _cleanupTimer?.Dispose();
                     UnsubscribeAll();
                     _cache?.Clear();
@@ -513,7 +552,6 @@ namespace Hian.NetworkUtilities
         }
 
         #endregion
-
     }
 
     /// <summary>
@@ -526,4 +564,4 @@ namespace Hian.NetworkUtilities
             return new NetworkCache(maxCacheSize, cleanupIntervalMinutes);
         }
     }
-} 
+}

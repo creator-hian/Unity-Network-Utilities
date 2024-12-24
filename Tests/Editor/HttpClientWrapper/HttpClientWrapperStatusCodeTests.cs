@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
+
 /// <summary>
 /// httpbin.org의 Status Code API를 테스트합니다.
 /// 엔드포인트: /status/{codes}
@@ -27,24 +28,27 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
     [TestCase(300, "Redirection")]
     [TestCase(400, "Client Errors")]
     [TestCase(500, "Server Errors")]
-    public async Task DeleteStatusCode_ReturnsExpectedResponse(int statusCode, string expectedDescription)
+    public async Task DeleteStatusCode_ReturnsExpectedResponse(
+        int statusCode,
+        string expectedDescription
+    )
     {
         // Arrange
-        var response = new HttpResponseMessage((HttpStatusCode)statusCode)
+        _ = new HttpResponseMessage((HttpStatusCode)statusCode)
         {
             Content = new StringContent(expectedDescription),
             StatusCode = (HttpStatusCode)statusCode,
-            ReasonPhrase = expectedDescription
+            ReasonPhrase = expectedDescription,
         };
         _mockHandler.SetupResponse((HttpStatusCode)statusCode, expectedDescription);
 
         try
         {
             // Act
-            var result = await _wrapper.DeleteAsync($"http://httpbin.org/status/{statusCode}");
+            string result = await _wrapper.DeleteAsync($"http://httpbin.org/status/{statusCode}");
 
             // Assert - 성공 상태 코드인 경우
-            if (statusCode >= 200 && statusCode < 300)
+            if (statusCode is >= 200 and < 300)
             {
                 Assert.That(result, Is.EqualTo(expectedDescription));
             }
@@ -54,9 +58,12 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
             // Assert - 실패 상태 코드인 경우
             if (statusCode >= 400)
             {
-                var expectedStatusName = ((HttpStatusCode)statusCode).ToString();
-                Assert.That(ex.Message, Does.Contain(expectedStatusName),
-                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}");
+                string expectedStatusName = ((HttpStatusCode)statusCode).ToString();
+                Assert.That(
+                    ex.Message,
+                    Does.Contain(expectedStatusName),
+                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}"
+                );
             }
         }
     }
@@ -71,24 +78,27 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
     [TestCase(300, "Redirection")]
     [TestCase(400, "Client Errors")]
     [TestCase(500, "Server Errors")]
-    public async Task GetStatusCode_ReturnsExpectedResponse(int statusCode, string expectedDescription)
+    public async Task GetStatusCode_ReturnsExpectedResponse(
+        int statusCode,
+        string expectedDescription
+    )
     {
         // Arrange
-        var response = new HttpResponseMessage((HttpStatusCode)statusCode)
+        _ = new HttpResponseMessage((HttpStatusCode)statusCode)
         {
             Content = new StringContent(expectedDescription),
             StatusCode = (HttpStatusCode)statusCode,
-            ReasonPhrase = expectedDescription
+            ReasonPhrase = expectedDescription,
         };
         _mockHandler.SetupResponse((HttpStatusCode)statusCode, expectedDescription);
 
         try
         {
             // Act
-            var result = await _wrapper.GetAsync($"http://httpbin.org/status/{statusCode}");
+            string result = await _wrapper.GetAsync($"http://httpbin.org/status/{statusCode}");
 
             // Assert - 성공 상태 코드인 경우
-            if (statusCode >= 200 && statusCode < 300)
+            if (statusCode is >= 200 and < 300)
             {
                 Assert.That(result, Is.EqualTo(expectedDescription));
             }
@@ -98,9 +108,12 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
             // Assert - 실패 상태 코드인 경우
             if (statusCode >= 400)
             {
-                var expectedStatusName = ((HttpStatusCode)statusCode).ToString();
-                Assert.That(ex.Message, Does.Contain(expectedStatusName),
-                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}");
+                string expectedStatusName = ((HttpStatusCode)statusCode).ToString();
+                Assert.That(
+                    ex.Message,
+                    Does.Contain(expectedStatusName),
+                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}"
+                );
             }
         }
     }
@@ -115,25 +128,31 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
     [TestCase(300, "Redirection")]
     [TestCase(400, "Client Errors")]
     [TestCase(500, "Server Errors")]
-    public async Task PatchStatusCode_ReturnsExpectedResponse(int statusCode, string expectedDescription)
+    public async Task PatchStatusCode_ReturnsExpectedResponse(
+        int statusCode,
+        string expectedDescription
+    )
     {
         // Arrange
         const string content = "{\"test\": \"data\"}";
-        var response = new HttpResponseMessage((HttpStatusCode)statusCode)
+        _ = new HttpResponseMessage((HttpStatusCode)statusCode)
         {
             Content = new StringContent(expectedDescription),
             StatusCode = (HttpStatusCode)statusCode,
-            ReasonPhrase = expectedDescription
+            ReasonPhrase = expectedDescription,
         };
         _mockHandler.SetupResponse((HttpStatusCode)statusCode, expectedDescription);
 
         try
         {
             // Act
-            var result = await _wrapper.PatchAsync($"http://httpbin.org/status/{statusCode}", content);
+            string result = await _wrapper.PatchAsync(
+                $"http://httpbin.org/status/{statusCode}",
+                content
+            );
 
             // Assert - 성공 상태 코드인 경우
-            if (statusCode >= 200 && statusCode < 300)
+            if (statusCode is >= 200 and < 300)
             {
                 Assert.That(result, Is.EqualTo(expectedDescription));
             }
@@ -143,9 +162,12 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
             // Assert - 실패 상태 코드인 경우
             if (statusCode >= 400)
             {
-                var expectedStatusName = ((HttpStatusCode)statusCode).ToString();
-                Assert.That(ex.Message, Does.Contain(expectedStatusName),
-                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}");
+                string expectedStatusName = ((HttpStatusCode)statusCode).ToString();
+                Assert.That(
+                    ex.Message,
+                    Does.Contain(expectedStatusName),
+                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}"
+                );
             }
         }
     }
@@ -160,25 +182,31 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
     [TestCase(300, "Redirection")]
     [TestCase(400, "Client Errors")]
     [TestCase(500, "Server Errors")]
-    public async Task PostStatusCode_ReturnsExpectedResponse(int statusCode, string expectedDescription)
+    public async Task PostStatusCode_ReturnsExpectedResponse(
+        int statusCode,
+        string expectedDescription
+    )
     {
         // Arrange
         const string content = "{\"test\": \"data\"}";
-        var response = new HttpResponseMessage((HttpStatusCode)statusCode)
+        _ = new HttpResponseMessage((HttpStatusCode)statusCode)
         {
             Content = new StringContent(expectedDescription),
             StatusCode = (HttpStatusCode)statusCode,
-            ReasonPhrase = expectedDescription
+            ReasonPhrase = expectedDescription,
         };
         _mockHandler.SetupResponse((HttpStatusCode)statusCode, expectedDescription);
 
         try
         {
             // Act
-            var result = await _wrapper.PostAsync($"http://httpbin.org/status/{statusCode}", content);
+            string result = await _wrapper.PostAsync(
+                $"http://httpbin.org/status/{statusCode}",
+                content
+            );
 
             // Assert - 성공 상태 코드인 경우
-            if (statusCode >= 200 && statusCode < 300)
+            if (statusCode is >= 200 and < 300)
             {
                 Assert.That(result, Is.EqualTo(expectedDescription));
             }
@@ -188,9 +216,12 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
             // Assert - 실패 상태 코드인 경우
             if (statusCode >= 400)
             {
-                var expectedStatusName = ((HttpStatusCode)statusCode).ToString();
-                Assert.That(ex.Message, Does.Contain(expectedStatusName),
-                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}");
+                string expectedStatusName = ((HttpStatusCode)statusCode).ToString();
+                Assert.That(
+                    ex.Message,
+                    Does.Contain(expectedStatusName),
+                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}"
+                );
             }
         }
     }
@@ -205,25 +236,31 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
     [TestCase(300, "Redirection")]
     [TestCase(400, "Client Errors")]
     [TestCase(500, "Server Errors")]
-    public async Task PutStatusCode_ReturnsExpectedResponse(int statusCode, string expectedDescription)
+    public async Task PutStatusCode_ReturnsExpectedResponse(
+        int statusCode,
+        string expectedDescription
+    )
     {
         // Arrange
         const string content = "{\"test\": \"data\"}";
-        var response = new HttpResponseMessage((HttpStatusCode)statusCode)
+        _ = new HttpResponseMessage((HttpStatusCode)statusCode)
         {
             Content = new StringContent(expectedDescription),
             StatusCode = (HttpStatusCode)statusCode,
-            ReasonPhrase = expectedDescription
+            ReasonPhrase = expectedDescription,
         };
         _mockHandler.SetupResponse((HttpStatusCode)statusCode, expectedDescription);
 
         try
         {
             // Act
-            var result = await _wrapper.PutAsync($"http://httpbin.org/status/{statusCode}", content);
+            string result = await _wrapper.PutAsync(
+                $"http://httpbin.org/status/{statusCode}",
+                content
+            );
 
             // Assert - 성공 상태 코드인 경우
-            if (statusCode >= 200 && statusCode < 300)
+            if (statusCode is >= 200 and < 300)
             {
                 Assert.That(result, Is.EqualTo(expectedDescription));
             }
@@ -233,9 +270,12 @@ public class HttpClientWrapperStatusCodeTests : HttpClientWrapperTestBase
             // Assert - 실패 상태 코드인 경우
             if (statusCode >= 400)
             {
-                var expectedStatusName = ((HttpStatusCode)statusCode).ToString();
-                Assert.That(ex.Message, Does.Contain(expectedStatusName),
-                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}");
+                string expectedStatusName = ((HttpStatusCode)statusCode).ToString();
+                Assert.That(
+                    ex.Message,
+                    Does.Contain(expectedStatusName),
+                    $"Expected error message to contain '{expectedStatusName}', but was: {ex.Message}"
+                );
             }
         }
     }
