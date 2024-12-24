@@ -31,23 +31,6 @@ All notable changes to this project will be documented in this file.
   - PingHost (동기/비동기)
   - 네트워크 타임아웃 설정
 
-- 네트워크 캐시 시스템
-  - NetworkCache 클래스 구현
-    - LRU 캐시 정책
-    - 스레드 안전 보장
-    - 동기/비동기 API
-    - 자동 만료 처리
-  - 캐시 관리 기능
-    - 배치 처리 지원
-    - 타이머 기반 자동 정리
-    - 수동 정리 옵션
-  - 모니터링 및 통계
-    - 캐시 상태 통계
-    - 이벤트 기반 알림
-  - 확장 가능한 구조
-    - INetworkCache 인터페이스
-    - DefaultNetworkCacheProvider 구현
-
 ### Tests Added
 
 - 네트워크 상태 테스트
@@ -65,22 +48,6 @@ All notable changes to this project will be documented in this file.
   - 잘못된 호스트 Ping 테스트
   - 비동기 Ping 테스트
   - 예외 처리 테스트
-
-- 네트워크 캐시 테스트
-  - 기본 CRUD 작업 테스트
-    - 데이터 저장 및 조회
-    - 항목 제거
-  - 캐시 만료 테스트
-    - 시간 기반 만료
-    - 자동 정리
-  - 이벤트 발생 테스트
-    - 추가/제거/만료 이벤트
-  - LRU 정책 테스트
-    - 최대 크기 초과 시 동작
-    - 가장 오래된 항목 제거
-  - 동시성 테스트
-    - 멀티스레드 안전성
-    - 경합 상황 처리
 
 ### Changed
 
