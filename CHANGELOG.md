@@ -31,15 +31,6 @@ All notable changes to this project will be documented in this file.
   - PingHost (동기/비동기)
   - 네트워크 타임아웃 설정
 
-- HTTP 클라이언트 기능
-  - HttpClientWrapper 구현
-  - 다양한 HTTP 메서드 지원 (GET, POST, PUT, DELETE, PATCH, HEAD)
-  - 재시도 메커니즘
-  - 동시 요청 제한
-  - 요청 메트릭스 추적
-  - 타임아웃 관리
-  - 취소 토큰 지원
-
 - 네트워크 캐시 시스템
   - NetworkCache 클래스 구현
     - LRU 캐시 정책
@@ -74,16 +65,6 @@ All notable changes to this project will be documented in this file.
   - 잘못된 호스트 Ping 테스트
   - 비동기 Ping 테스트
   - 예외 처리 테스트
-
-- HTTP 클라이언트 테스트
-  - HTTP 메서드 테스트 (GET, POST, PUT, DELETE, PATCH, HEAD)
-  - HTTP 상태 코드 응답 테스트
-  - 요청 검사 테스트 (헤더, IP, User-Agent)
-  - 인증 및 쿠키 테스트
-  - 리다이렉션 테스트
-  - 응답 형식 테스트
-  - 동적 데이터 테스트
-  - 이미지 응답 테스트
 
 - 네트워크 캐시 테스트
   - 기본 CRUD 작업 테스트
