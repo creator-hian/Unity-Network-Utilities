@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Collections.Generic;
 
 namespace Hian.NetworkUtilities
 {
@@ -25,16 +25,13 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 요청 타임아웃
         /// </summary>
-        public TimeSpan Timeout
-        {
+        public TimeSpan Timeout 
+        { 
             get => _timeout;
             set
             {
                 if (value <= TimeSpan.Zero)
-                {
                     throw new ArgumentException("Timeout must be greater than zero", nameof(value));
-                }
-
                 _timeout = value;
             }
         }
@@ -52,16 +49,13 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 재시도 횟수
         /// </summary>
-        public int RetryCount
-        {
+        public int RetryCount 
+        { 
             get => _retryCount;
             set
             {
                 if (value < 0)
-                {
                     throw new ArgumentException("Retry count cannot be negative", nameof(value));
-                }
-
                 _retryCount = value;
             }
         }
@@ -69,16 +63,13 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 재시도 대기 시간
         /// </summary>
-        public TimeSpan RetryDelay
-        {
+        public TimeSpan RetryDelay 
+        { 
             get => _retryDelay;
             set
             {
                 if (value < TimeSpan.Zero)
-                {
                     throw new ArgumentException("Retry delay cannot be negative", nameof(value));
-                }
-
                 _retryDelay = value;
             }
         }
@@ -86,19 +77,13 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 동시 요청 제한 수
         /// </summary>
-        public int MaxConcurrentRequests
-        {
+        public int MaxConcurrentRequests 
+        { 
             get => _maxConcurrentRequests;
             set
             {
                 if (value <= 0)
-                {
-                    throw new ArgumentException(
-                        "Max concurrent requests must be greater than zero",
-                        nameof(value)
-                    );
-                }
-
+                    throw new ArgumentException("Max concurrent requests must be greater than zero", nameof(value));
                 _maxConcurrentRequests = value;
             }
         }
@@ -106,19 +91,13 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 메트릭스 수집 최대 개수
         /// </summary>
-        public int MaxMetricsCount
-        {
+        public int MaxMetricsCount 
+        { 
             get => _maxMetricsCount;
             set
             {
                 if (value <= 0)
-                {
-                    throw new ArgumentException(
-                        "Max metrics count must be greater than zero",
-                        nameof(value)
-                    );
-                }
-
+                    throw new ArgumentException("Max metrics count must be greater than zero", nameof(value));
                 _maxMetricsCount = value;
             }
         }
@@ -126,8 +105,8 @@ namespace Hian.NetworkUtilities
         /// <summary>
         /// 요청 실패 시 재시도할 HTTP 상태 코드들
         /// </summary>
-        public HashSet<HttpStatusCode> RetryableStatusCodes
-        {
+        public HashSet<HttpStatusCode> RetryableStatusCodes 
+        { 
             get => _retryableStatusCodes;
             set => _retryableStatusCodes = value ?? new HashSet<HttpStatusCode>();
         }
@@ -139,15 +118,14 @@ namespace Hian.NetworkUtilities
         {
             get
             {
-                HttpClientSettings settings = new HttpClientSettings
+                var settings = new HttpClientSettings
                 {
                     Handler = new HttpClientHandler
                     {
-                        AutomaticDecompression =
-                            DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                         AllowAutoRedirect = true,
                         MaxAutomaticRedirections = 20,
-                        UseCookies = true,
+                        UseCookies = true
                     },
                     RetryableStatusCodes = new HashSet<HttpStatusCode>
                     {
@@ -155,8 +133,8 @@ namespace Hian.NetworkUtilities
                         HttpStatusCode.InternalServerError,
                         HttpStatusCode.BadGateway,
                         HttpStatusCode.ServiceUnavailable,
-                        HttpStatusCode.GatewayTimeout,
-                    },
+                        HttpStatusCode.GatewayTimeout
+                    }
                 };
                 settings.Validate();
                 return settings;
@@ -169,29 +147,19 @@ namespace Hian.NetworkUtilities
         public void Validate()
         {
             if (Timeout <= TimeSpan.Zero)
-            {
                 throw new ArgumentException("Timeout must be greater than zero");
-            }
-
+            
             if (RetryCount < 0)
-            {
                 throw new ArgumentException("Retry count cannot be negative");
-            }
-
+            
             if (RetryDelay <= TimeSpan.Zero)
-            {
                 throw new ArgumentException("Retry delay must be greater than zero");
-            }
-
+            
             if (MaxConcurrentRequests <= 0)
-            {
                 throw new ArgumentException("Max concurrent requests must be greater than zero");
-            }
 
             if (MaxMetricsCount <= 0)
-            {
                 throw new ArgumentException("Max metrics count must be greater than zero");
-            }
         }
 
         /// <summary>
@@ -199,18 +167,15 @@ namespace Hian.NetworkUtilities
         /// </summary>
         public HttpClientSettings Clone()
         {
-            HttpClientSettings clone = new HttpClientSettings
+            var clone = new HttpClientSettings
             {
-                Handler =
-                    Handler != null
-                        ? new HttpClientHandler
-                        {
-                            AutomaticDecompression = Handler.AutomaticDecompression,
-                            AllowAutoRedirect = Handler.AllowAutoRedirect,
-                            MaxAutomaticRedirections = Handler.MaxAutomaticRedirections,
-                            UseCookies = Handler.UseCookies,
-                        }
-                        : null,
+                Handler = Handler != null ? new HttpClientHandler
+                {
+                    AutomaticDecompression = Handler.AutomaticDecompression,
+                    AllowAutoRedirect = Handler.AllowAutoRedirect,
+                    MaxAutomaticRedirections = Handler.MaxAutomaticRedirections,
+                    UseCookies = Handler.UseCookies
+                } : null,
                 Timeout = Timeout,
                 BaseAddress = BaseAddress,
                 HttpVersion = HttpVersion,
@@ -218,7 +183,7 @@ namespace Hian.NetworkUtilities
                 RetryDelay = RetryDelay,
                 MaxConcurrentRequests = MaxConcurrentRequests,
                 MaxMetricsCount = MaxMetricsCount,
-                RetryableStatusCodes = new HashSet<HttpStatusCode>(_retryableStatusCodes),
+                RetryableStatusCodes = new HashSet<HttpStatusCode>(_retryableStatusCodes)
             };
             return clone;
         }
@@ -228,10 +193,10 @@ namespace Hian.NetworkUtilities
         /// </summary>
         public HttpClientSettings With(Action<HttpClientSettings> modifier)
         {
-            HttpClientSettings clone = Clone();
+            var clone = this.Clone();
             modifier(clone);
             clone.Validate();
             return clone;
         }
     }
-}
+} 

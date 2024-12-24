@@ -1,16 +1,15 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
-
 /// <summary>
 /// httpbin.org의 Authentication API를 테스트합니다.
-///
+/// 
 /// 테스트 대상 API:
 /// - Basic Auth (/basic-auth/{user}/{passwd})
 /// - Bearer Token Auth (/bearer)
 /// - Digest Auth (/digest-auth/{qop}/{user}/{passwd})
 /// - Digest Auth with Algorithm (/digest-auth/{qop}/{user}/{passwd}/{algorithm})
 /// - Hidden Basic Auth (/hidden-basic-auth/{user}/{passwd})
-///
+/// 
 /// 각 엔드포인트는 다양한 인증 방식을 테스트하기 위한 목적으로 사용됩니다.
 /// 모든 성공적인 인증은 200 상태 코드와 함께 application/json 응답을 반환합니다.
 /// </summary>
@@ -44,7 +43,7 @@ public class HttpClientWrapperAuthenticationTests : HttpClientWrapperTestBase
     /// </summary>
     [Test]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task BearerAuth_WithValidToken_ReturnsSuccess()
+    public async Task BearerAuth_WithValidToken_ReturnsSuccess() 
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: Bearer 토큰 인증 테스트 구현

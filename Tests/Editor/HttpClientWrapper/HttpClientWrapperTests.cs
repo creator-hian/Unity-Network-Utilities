@@ -1,11 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Hian.NetworkUtilities;
 using NUnit.Framework;
+using UnityEngine;
+using System.Collections.Generic;
+using Hian.NetworkUtilities;
 
 // 기본 설정을 위한 추상 기본 클래스
 public abstract class HttpClientWrapperTestBase
@@ -27,10 +28,10 @@ public abstract class HttpClientWrapperTestBase
             MaxMetricsCount = 100,
             Timeout = TimeSpan.FromSeconds(1),
             RetryableStatusCodes = new HashSet<HttpStatusCode>
-            {
-                HttpStatusCode.InternalServerError,
-                HttpStatusCode.ServiceUnavailable,
-            },
+                {
+                    HttpStatusCode.InternalServerError,
+                    HttpStatusCode.ServiceUnavailable
+                }
         };
 
         _wrapper = new HttpClientWrapper(_settings);
@@ -55,7 +56,7 @@ public class HttpClientWrapperCoreFunctionalityTests : HttpClientWrapperTestBase
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedContent);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/get");
+        var result = await _wrapper.GetAsync("http://httpbin.org/get");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedContent));
@@ -70,9 +71,8 @@ public class HttpClientWrapperCoreFunctionalityTests : HttpClientWrapperTestBase
         _wrapper.Dispose();
 
         // Act & Assert
-        _ = Assert.ThrowsAsync<ObjectDisposedException>(
-            async () => await _wrapper.GetAsync("http://httpbin.org/get")
-        );
+        Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+            await _wrapper.GetAsync("http://httpbin.org/get"));
     }
 
     [Test]
@@ -80,32 +80,32 @@ public class HttpClientWrapperCoreFunctionalityTests : HttpClientWrapperTestBase
     {
         // Arrange
         const string expectedContent = "Success";
-        HttpResponseMessage[] responses = new[]
+        var responses = new[]
         {
-            new HttpResponseMessage(HttpStatusCode.InternalServerError)
-            {
+            new HttpResponseMessage(HttpStatusCode.InternalServerError) 
+            { 
                 Content = new StringContent("Error 1"),
                 StatusCode = HttpStatusCode.InternalServerError,
-                ReasonPhrase = "Internal Server Error",
+                ReasonPhrase = "Internal Server Error"
             },
-            new HttpResponseMessage(HttpStatusCode.InternalServerError)
-            {
+            new HttpResponseMessage(HttpStatusCode.InternalServerError) 
+            { 
                 Content = new StringContent("Error 2"),
                 StatusCode = HttpStatusCode.InternalServerError,
-                ReasonPhrase = "Internal Server Error",
+                ReasonPhrase = "Internal Server Error"
             },
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
+            new HttpResponseMessage(HttpStatusCode.OK) 
+            { 
                 Content = new StringContent(expectedContent),
                 StatusCode = HttpStatusCode.OK,
-                ReasonPhrase = "OK",
-            },
+                ReasonPhrase = "OK"
+            }
         };
         _mockHandler.SetupResponses(responses);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/status/500");
-
+        var result = await _wrapper.GetAsync("http://httpbin.org/status/500");
+        
         // Assert
         Assert.That(result, Is.EqualTo(expectedContent));
         Assert.That(_wrapper.TotalRequestCount, Is.EqualTo(1));
@@ -118,26 +118,27 @@ public class HttpClientWrapperCoreFunctionalityTests : HttpClientWrapperTestBase
     {
         // Arrange
         _wrapper.SetTimeout(500);
-        HttpClientSettings settings = _settings.Clone();
+        var settings = _settings.Clone();
         settings.Handler = _mockHandler;
         settings.RetryableStatusCodes = new HashSet<HttpStatusCode>
         {
             HttpStatusCode.InternalServerError,
-            HttpStatusCode.ServiceUnavailable,
+            HttpStatusCode.ServiceUnavailable
         };
         _wrapper = new HttpClientWrapper(settings);
-        _ = new HttpResponseMessage(HttpStatusCode.NotFound)
-        {
+
+        var notFoundResponse = new HttpResponseMessage(HttpStatusCode.NotFound) 
+        { 
             Content = new StringContent("Not Found"),
             ReasonPhrase = "Not Found",
-            StatusCode = HttpStatusCode.NotFound,
+            StatusCode = HttpStatusCode.NotFound
         };
         _mockHandler.SetupResponse(HttpStatusCode.NotFound, "Not Found");
 
         try
         {
             // Act
-            _ = await _wrapper.GetAsync("http://httpbin.org/status/404");
+            await _wrapper.GetAsync("http://httpbin.org/status/404");
             Assert.Fail("Expected HttpRequestException was not thrown");
         }
         catch (HttpRequestException ex)
@@ -157,101 +158,76 @@ public class HttpClientWrapperConcurrencyTests : HttpClientWrapperTestBase
     public async Task ConcurrentRequests_RespectMaxLimit()
     {
         // Arrange
-        TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-        HttpResponseMessage[] responses = new[]
+        var tcs = new TaskCompletionSource<bool>();
+        var responses = new[]
         {
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("Response 1"),
-            },
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("Response 2"),
-            },
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("Response 3"),
-            },
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Response 1") },
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Response 2") },
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Response 3") }
         };
         _mockHandler.SetupResponses(responses);
 
         // Act
-        Task<string> task1 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/get"));
-        Task<string> task2 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/delay/1"));
-
+        var task1 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/get"));
+        var task2 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/delay/1"));
+        
         // 첫 두 요청이 시작되기를 기다림
         await Task.Delay(100);
-
+        
         // Assert - 첫 두 요청이 동시에 실행 중인지 확인
-        Assert.That(
-            _mockHandler.ActiveRequestCount,
-            Is.EqualTo(2),
-            "Expected 2 concurrent requests"
-        );
-
+        Assert.That(_mockHandler.ActiveRequestCount, Is.EqualTo(2), "Expected 2 concurrent requests");
+        
         // 세 번째 요청 시작 (이 요청은 대기해야 함)
-        Task<string> task3 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/delay/2"));
-
+        var task3 = Task.Run(() => _wrapper.GetAsync("http://httpbin.org/delay/2"));
+        
         // 모든 요청 완료 대기
-        _ = await Task.WhenAll(task1, task2, task3);
-
+        await Task.WhenAll(task1, task2, task3);
+        
         // 최종 Assert
         Assert.That(_mockHandler.RequestCount, Is.EqualTo(3), "Expected total of 3 requests");
-        Assert.That(
-            _mockHandler.ActiveRequestCount,
-            Is.EqualTo(0),
-            "Expected no active requests after completion"
-        );
+        Assert.That(_mockHandler.ActiveRequestCount, Is.EqualTo(0), "Expected no active requests after completion");
     }
 
     [Test]
     public async Task Metrics_TrackSuccessAndFailure()
     {
         // Arrange
-        HttpResponseMessage[] responses = new[]
+        var responses = new[]
         {
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
+            new HttpResponseMessage(HttpStatusCode.OK) 
+            { 
                 Content = new StringContent("Success"),
                 StatusCode = HttpStatusCode.OK,
-                ReasonPhrase = "OK",
+                ReasonPhrase = "OK"
             },
-            new HttpResponseMessage(HttpStatusCode.NotFound)
-            {
+            new HttpResponseMessage(HttpStatusCode.NotFound) 
+            { 
                 Content = new StringContent("Not Found"),
                 StatusCode = HttpStatusCode.NotFound,
-                ReasonPhrase = "Not Found",
-            },
+                ReasonPhrase = "Not Found"
+            }
         };
         _mockHandler.SetupResponses(responses);
 
         // Act - 첫 번째 요청 (성공)
-        string result = await _wrapper.GetAsync("http://httpbin.org/get");
+        var result = await _wrapper.GetAsync("http://httpbin.org/get");
         Assert.That(result, Is.EqualTo("Success"), "First request should succeed");
 
         // Act - 두 번째 요청 (실패)
         try
         {
-            _ = await _wrapper.GetAsync("http://httpbin.org/status/404");
+            await _wrapper.GetAsync("http://httpbin.org/status/404");
             Assert.Fail("Expected HttpRequestException was not thrown");
         }
         catch (HttpRequestException ex)
         {
-            Assert.That(
-                ex.Message,
-                Does.Contain("NotFound"),
-                "Exception should contain status code"
-            );
+            Assert.That(ex.Message, Does.Contain("NotFound"), "Exception should contain status code");
         }
 
         // Assert - 메트릭스 확인
         Assert.That(_wrapper.TotalRequestCount, Is.EqualTo(2), "Should have 2 total requests");
         Assert.That(_wrapper.FailedRequestCount, Is.EqualTo(1), "Should have 1 failed request");
-        Assert.That(
-            _wrapper.AverageResponseTime,
-            Is.GreaterThan(TimeSpan.Zero),
-            "Should have positive average response time"
-        );
+        Assert.That(_wrapper.AverageResponseTime, Is.GreaterThan(TimeSpan.Zero), "Should have positive average response time");
     }
 }
 
@@ -275,7 +251,7 @@ public class HttpClientWrapperHeaderManagementTests : HttpClientWrapperTestBase
     public void DefaultHeaders_AddWithEmptyName_ThrowsArgumentNullException()
     {
         // Act & Assert
-        _ = Assert.Throws<ArgumentNullException>(() => _wrapper.AddDefaultHeader("", "value"));
+        Assert.Throws<ArgumentNullException>(() => _wrapper.AddDefaultHeader("", "value"));
     }
 }
 
@@ -292,7 +268,7 @@ public class HttpClientWrapperImplementationTests : HttpClientWrapperTestBase
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedResponse);
 
         // Act
-        string result = await _wrapper.PostAsync("http://httpbin.org/post", requestContent);
+        var result = await _wrapper.PostAsync("http://httpbin.org/post", requestContent);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedResponse));
@@ -308,7 +284,7 @@ public class HttpClientWrapperImplementationTests : HttpClientWrapperTestBase
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedResponse);
 
         // Act
-        string result = await _wrapper.PutAsync("http://httpbin.org/put", requestContent);
+        var result = await _wrapper.PutAsync("http://httpbin.org/put", requestContent);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedResponse));
@@ -323,7 +299,7 @@ public class HttpClientWrapperImplementationTests : HttpClientWrapperTestBase
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedResponse);
 
         // Act
-        string result = await _wrapper.DeleteAsync("http://httpbin.org/delete");
+        var result = await _wrapper.DeleteAsync("http://httpbin.org/delete");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedResponse));
@@ -335,23 +311,20 @@ public class HttpClientWrapperImplementationTests : HttpClientWrapperTestBase
 public class MockHttpMessageHandler : HttpClientHandler
 {
     private Queue<HttpResponseMessage> _responses = new Queue<HttpResponseMessage>();
-
+    private TaskCompletionSource<bool> _delayTask;
     public int RequestCount { get; private set; }
     private int _activeRequestCount;
     public int ActiveRequestCount => _activeRequestCount;
 
     public void SetupResponse(HttpStatusCode statusCode, string content = null)
     {
-        HttpResponseMessage response = new HttpResponseMessage(statusCode)
+        var response = new HttpResponseMessage(statusCode)
         {
             StatusCode = statusCode,
-            ReasonPhrase = statusCode.ToString(),
+            ReasonPhrase = statusCode.ToString()
         };
         if (content != null)
-        {
             response.Content = new StringContent(content);
-        }
-
         _responses.Clear();
         _responses.Enqueue(response);
     }
@@ -359,19 +332,16 @@ public class MockHttpMessageHandler : HttpClientHandler
     public void SetupResponses(IEnumerable<HttpResponseMessage> responses)
     {
         _responses.Clear();
-        foreach (HttpResponseMessage response in responses)
-        {
+        foreach (var response in responses)
             _responses.Enqueue(response);
-        }
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         RequestCount++;
-        _ = Interlocked.Increment(ref _activeRequestCount);
+        Interlocked.Increment(ref _activeRequestCount);
 
         try
         {
@@ -383,7 +353,7 @@ public class MockHttpMessageHandler : HttpClientHandler
                 {
                     Content = new StringContent("Default Response"),
                     StatusCode = HttpStatusCode.OK,
-                    ReasonPhrase = "OK",
+                    ReasonPhrase = "OK"
                 };
             }
 
@@ -391,7 +361,7 @@ public class MockHttpMessageHandler : HttpClientHandler
         }
         finally
         {
-            _ = Interlocked.Decrement(ref _activeRequestCount);
+            Interlocked.Decrement(ref _activeRequestCount);
         }
     }
 }

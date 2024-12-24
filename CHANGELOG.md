@@ -100,3 +100,7 @@ All notable changes to this project will be documented in this file.
   - 동시성 테스트
     - 멀티스레드 안전성
     - 경합 상황 처리
+
+### Changed
+
+### Fixed

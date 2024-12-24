@@ -1,9 +1,8 @@
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-
+using System.Text;
 /// <summary>
 /// httpbin.org API 명세에 따른 HTTP 메서드 테스트
 /// </summary>
@@ -24,17 +23,17 @@ public class HttpClientWrapperHttpMethodTests : HttpClientWrapperTestBase
     public async Task DeleteAsync_ReturnsJsonResponse()
     {
         // Arrange
-        string expectedJson = "{\"status\":\"success\"}";
-        _ = new HttpResponseMessage(HttpStatusCode.OK)
+        var expectedJson = "{\"status\":\"success\"}";
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(expectedJson, Encoding.UTF8, "application/json"),
             StatusCode = HttpStatusCode.OK,
-            ReasonPhrase = "OK",
+            ReasonPhrase = "OK"
         };
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.DeleteAsync("http://httpbin.org/delete");
+        var result = await _wrapper.DeleteAsync("http://httpbin.org/delete");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -55,17 +54,17 @@ public class HttpClientWrapperHttpMethodTests : HttpClientWrapperTestBase
     public async Task GetAsync_ReturnsJsonResponse()
     {
         // Arrange
-        string expectedJson = "{\"query_params\":{}}";
-        _ = new HttpResponseMessage(HttpStatusCode.OK)
+        var expectedJson = "{\"query_params\":{}}";
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(expectedJson, Encoding.UTF8, "application/json"),
             StatusCode = HttpStatusCode.OK,
-            ReasonPhrase = "OK",
+            ReasonPhrase = "OK"
         };
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.GetAsync("http://httpbin.org/get");
+        var result = await _wrapper.GetAsync("http://httpbin.org/get");
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -86,18 +85,18 @@ public class HttpClientWrapperHttpMethodTests : HttpClientWrapperTestBase
     public async Task PatchAsync_ReturnsJsonResponse()
     {
         // Arrange
-        string requestContent = "{\"test\": \"data\"}";
-        string expectedJson = "{\"json\":{\"test\":\"data\"}}";
-        _ = new HttpResponseMessage(HttpStatusCode.OK)
+        var requestContent = "{\"test\": \"data\"}";
+        var expectedJson = "{\"json\":{\"test\":\"data\"}}";
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(expectedJson, Encoding.UTF8, "application/json"),
             StatusCode = HttpStatusCode.OK,
-            ReasonPhrase = "OK",
+            ReasonPhrase = "OK"
         };
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.PatchAsync("http://httpbin.org/patch", requestContent);
+        var result = await _wrapper.PatchAsync("http://httpbin.org/patch", requestContent);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -118,18 +117,18 @@ public class HttpClientWrapperHttpMethodTests : HttpClientWrapperTestBase
     public async Task PostAsync_ReturnsJsonResponse()
     {
         // Arrange
-        string requestContent = "{\"test\": \"data\"}";
-        string expectedJson = "{\"json\":{\"test\":\"data\"}}";
-        _ = new HttpResponseMessage(HttpStatusCode.OK)
+        var requestContent = "{\"test\": \"data\"}";
+        var expectedJson = "{\"json\":{\"test\":\"data\"}}";
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(expectedJson, Encoding.UTF8, "application/json"),
             StatusCode = HttpStatusCode.OK,
-            ReasonPhrase = "OK",
+            ReasonPhrase = "OK"
         };
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.PostAsync("http://httpbin.org/post", requestContent);
+        var result = await _wrapper.PostAsync("http://httpbin.org/post", requestContent);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
@@ -150,18 +149,18 @@ public class HttpClientWrapperHttpMethodTests : HttpClientWrapperTestBase
     public async Task PutAsync_ReturnsJsonResponse()
     {
         // Arrange
-        string requestContent = "{\"test\": \"data\"}";
-        string expectedJson = "{\"json\":{\"test\":\"data\"}}";
-        _ = new HttpResponseMessage(HttpStatusCode.OK)
+        var requestContent = "{\"test\": \"data\"}";
+        var expectedJson = "{\"json\":{\"test\":\"data\"}}";
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(expectedJson, Encoding.UTF8, "application/json"),
             StatusCode = HttpStatusCode.OK,
-            ReasonPhrase = "OK",
+            ReasonPhrase = "OK"
         };
         _mockHandler.SetupResponse(HttpStatusCode.OK, expectedJson);
 
         // Act
-        string result = await _wrapper.PutAsync("http://httpbin.org/put", requestContent);
+        var result = await _wrapper.PutAsync("http://httpbin.org/put", requestContent);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedJson));
